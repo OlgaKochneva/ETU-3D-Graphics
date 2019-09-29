@@ -113,8 +113,8 @@ function initBuffers() {
     figures[0].initPositionBuffer(figures[0].getVerticesMatrix(), 3, 4);
     figures[0].initColorBuffer(figures[0].getColorMatrix(), 4, 4);
 
-    figures[1].initPositionBuffer(figures[0].getVerticesMatrix(), 3, 2);
-    figures[1].initColorBuffer(figures[0].getColorMatrix(), 4, 4);
+    figures[1].initPositionBuffer(figures[1].getVerticesMatrix(), 3, figures[1].freq * 4);
+    figures[1].initColorBuffer(figures[1].getColorMatrix(), 4, figures[1].freq * 4);
 }
 
 
@@ -129,7 +129,7 @@ function drawScene() {
 
      mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
     setBuffersToShaders(figures[1].getPositionBuffer(), figures[1].getColorBuffer());
-    gl.drawArrays(gl.LINE_LOOP, 0, figures[1].getPositionBuffer().numItems);
+    gl.drawArrays(gl.LINES, 0, figures[1].getPositionBuffer().numItems);
     // setBuffersToShaders(triangleVertexPositionBuffer, triangleVertexColorBuffer);
     // gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
 
@@ -153,7 +153,8 @@ function setBuffersToShaders(pos_buffer, color_buffer) {
 function webGLStart() {
     const canvas = document.getElementById("central_canvas");
     initGL(canvas);
-    figures = [new Rectangle(), new Line()];
+    figures = [new Rectangle(2, 4, [1.0, 0.0, 0.5, 1.0]),
+               new Net(1, 1, 10, [0.0, 1.0, 0.0, 1.0])];
     initShaders();
     initBuffers();
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -196,11 +197,11 @@ class Figure {
 }
 
 class Rectangle extends Figure {
-    constructor() {
+    constructor(a, b, color) {
         super();
-        this.aSide = 2;
-        this.bSide = 4;
-        this.color = [0.5, 0.5, 1.0, 1.0];
+        this.aSide = a;
+        this.bSide = b;
+        this.color = color;
     }
 
     getColorMatrix(){
@@ -221,12 +222,47 @@ class Rectangle extends Figure {
     }
 }
 
-class Line extends Figure {
-    constructor() {
+
+class Net extends Figure {
+    constructor(height, width, freq, color) {
         super();
-        this.pointA = [2.0, 10.0, 0.0];
-        this.pointB = [-2.0, 10.0, 0.0];
-        this.color = [0.5, 0.5, 1.0, 1.0];
+        this.height = height;
+        this.width = width;
+        this.freq = freq+1;
+        this.color = color;
+        this.center = [0.5, 0.5, 0.0];
+    }
+
+    getColorMatrix(){
+        let colors = [];
+        for (let i=0; i < this.freq * 4; i++) {
+            colors = colors.concat(this.color);
+        }
+        return colors;
+    }
+
+    getVerticesMatrix(){
+        let vertices = [];
+        let vertical_offset = this.height / (this.freq - 1);
+        let horizontal_offset = this.width / (this.freq - 1);
+        for(let i = 0; i < this.freq; i ++) {
+            let left_point = [this.center[0] - this.width / 2, (this.center[1] + this.height / 2) - i * vertical_offset, 0.0];
+            let right_point = [this.center[0] + this.width / 2, (this.center[1] + this.height / 2) - i * vertical_offset, 0.0];
+            vertices = vertices.concat(left_point.concat(right_point));
+            let top_point = [this.center[0] - this.width / 2 + i * horizontal_offset, this.center[1] + this.height / 2, 0.0];
+            let low_point = [this.center[0] - this.width / 2 + i * horizontal_offset, this.center[1] - this.height / 2, 0.0];
+            vertices = vertices.concat(top_point.concat(low_point));
+        }
+        return vertices;
+    }
+}
+
+class Line extends Figure {
+    constructor(a, b ,color) {
+        super();
+        this.pointA = a;
+        this.pointB = b;
+        this.color = color;
     }
 
     getColorMatrix(){
