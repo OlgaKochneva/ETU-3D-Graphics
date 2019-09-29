@@ -77,44 +77,10 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
 
-
-
-//let triangleVertexPositionBuffer;
-//let triangleVertexColorBuffer;
-//let squareVertexPositionBuffer;
-//let squareVertexColorBuffer;
-
 function initBuffers() {
-    // triangleVertexPositionBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-    // let vertices = [
-    //     0.0,  1.0,  0.0,
-    //     -1.0, -1.0,  0.0,
-    //     1.0, -1.0,  0.0
-    // ];
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    // triangleVertexPositionBuffer.itemSize = 3;
-    // triangleVertexPositionBuffer.numItems = 3;
-    //
-    // triangleVertexColorBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
-    // var colors = [
-    //     1.0, 0.0, 0.0, 1.0,
-    //     0.0, 1.0, 0.0, 1.0,
-    //     0.0, 0.0, 1.0, 1.0
-    // ];
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    // triangleVertexColorBuffer.itemSize = 4;
-    // triangleVertexColorBuffer.numItems = 3;
-
-    // for(let i = 0; i < figures.length; i++){
-    //     figures[i] =
-    // }
-    figures[0].initPositionBuffer(figures[0].getVerticesMatrix(), 3, 4);
-    figures[0].initColorBuffer(figures[0].getColorMatrix(), 4, 4);
-
-    figures[1].initPositionBuffer(figures[1].getVerticesMatrix(), 3, figures[1].freq * 4);
-    figures[1].initColorBuffer(figures[1].getColorMatrix(), 4, figures[1].freq * 4);
+    for(let i = 0; i < figures.length; i++){
+        figures[i].initBuffers();
+    }
 }
 
 
@@ -130,13 +96,14 @@ function drawScene() {
      mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
     setBuffersToShaders(figures[1].getPositionBuffer(), figures[1].getColorBuffer());
     gl.drawArrays(gl.LINES, 0, figures[1].getPositionBuffer().numItems);
-    // setBuffersToShaders(triangleVertexPositionBuffer, triangleVertexColorBuffer);
-    // gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-
 
     mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
     setBuffersToShaders(figures[0].getPositionBuffer(), figures[0].getColorBuffer());
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, figures[0].getPositionBuffer().numItems);
+
+    mat4.translate(mvMatrix, [-3.0, -2.0, 0.0]);
+    setBuffersToShaders(figures[2].getPositionBuffer(), figures[2].getColorBuffer());
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[2].getPositionBuffer().numItems);
 
 }
 
@@ -153,8 +120,10 @@ function setBuffersToShaders(pos_buffer, color_buffer) {
 function webGLStart() {
     const canvas = document.getElementById("central_canvas");
     initGL(canvas);
-    figures = [new Rectangle(2, 4, [1.0, 0.0, 0.5, 1.0]),
-               new Net(1, 1, 10, [0.0, 1.0, 0.0, 1.0])];
+    figures = [new Rectangle([0.0,0.0,0.0], 2, 4, [1.0, 0.0, 0.5, 1.0]),
+               new Net([0.5, 0.5, 0.0],1, 1, 10, [0.0, 1.0, 0.0, 1.0]),
+               new Circle([0.5, 0.5, 0.0], 1, [1.0, 0.0, 0.0, 1.0])
+    ];
     initShaders();
     initBuffers();
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -164,27 +133,43 @@ function webGLStart() {
 }
 
 function changeColor() {
-
+    let cur_figure = document.getElementById("cur_figure").value;
+    let color_list = document.getElementsByName("color");
+    let color = [];
+    for (let i = 0; i < color_list.length; i++) {
+        color.push(color_list[i].value / 255)
+    }
+    gl.lineWidth(document.getElementById("line_width").value);
+    for (let i = 0; i < figures.length; i++){
+        if (cur_figure == figures[i].name){
+            figures[i].color = color;
+            figures[i].initBuffers();
+        }
+    }
+    drawScene();
 }
 
 class Figure {
-    constructor() {
+    constructor(center) {
         this.vertexPositionBuffer = gl.createBuffer();
         this.vertexColorBuffer = gl.createBuffer();
+        this.vertices = [];
+        this.colors = [];
+        this.center = center;
     }
 
-    initPositionBuffer(vertices, itemSize, numItems){
+    initPositionBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        this.vertexPositionBuffer.itemSize = itemSize;
-        this.vertexPositionBuffer.numItems = numItems;
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+        this.vertexPositionBuffer.itemSize = 3;
+        this.vertexPositionBuffer.numItems = this.vertices.length / 3;
     }
 
-    initColorBuffer(colors, itemSize, numItems){
+    initColorBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexColorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-        this.vertexColorBuffer.itemSize = itemSize;
-        this.vertexColorBuffer.numItems = numItems;
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
+        this.vertexColorBuffer.itemSize = 4;
+        this.vertexColorBuffer.numItems = this.colors.length / 4;
     }
 
     getPositionBuffer(){
@@ -196,52 +181,104 @@ class Figure {
     }
 }
 
+class Circle extends Figure {
+    constructor(center, radius, color) {
+        super(center);
+        this.name = "Circle";
+        this.radius = radius;
+        this.color = color;
+    }
+
+    initBuffers(){
+        this.generateVerticesMatrix();
+        this.generateColorMatrix();
+        this.initPositionBuffer();
+        this.initColorBuffer();
+    }
+
+    generateColorMatrix(){
+        let colors = [];
+        for (let i=0; i < this.vertices.length; i++) {
+            colors = colors.concat(this.color);
+        }
+        this.colors = colors;
+    }
+
+    generateVerticesMatrix(){
+        let vertices = [];
+
+        for(let theta = 0; theta < 2 * Math.PI; theta += 0.01) {
+            let x1  = this.center[0] + this.radius * Math.cos(theta);
+            let y1 = this.center[1] + this.radius * Math.sin(theta);
+            let x2  = this.center[0] + this.radius * Math.cos(theta + 0.01);
+            let y2 = this.center[1] + this.radius * Math.sin(theta + 0.01);
+            vertices.concat(this.center);
+            vertices.push(x1, y1, 0.0, x2, y2, 0)
+        }
+        this.vertices = vertices;
+    }
+}
+
 class Rectangle extends Figure {
-    constructor(a, b, color) {
-        super();
+    constructor(center, a, b, color) {
+        super(center);
+        this.name = "Rectangle";
         this.aSide = a;
         this.bSide = b;
         this.color = color;
     }
 
-    getColorMatrix(){
+    initBuffers(){
+        this.generateVerticesMatrix();
+        this.generateColorMatrix();
+        this.initPositionBuffer();
+        this.initColorBuffer();
+    }
+    generateColorMatrix(){
         let colors = [];
         for (let i=0; i < 4; i++) {
             colors = colors.concat(this.color);
         }
-        return colors;
+        this.colors = colors;
     }
 
-    getVerticesMatrix(){
-        return [
-            this.aSide / 2,  this.bSide / 2,  0.0,
-            -this.aSide / 2,  this.bSide / 2,  0.0,
-            this.aSide / 2, -this.bSide / 2,  0.0,
-            -this.aSide / 2, -this.bSide / 2,  0.0
+    generateVerticesMatrix(){
+        this.vertices = [
+            this.aSide / 2, this.bSide / 2, 0.0,
+            -this.aSide / 2, this.bSide / 2, 0.0,
+            this.aSide / 2, -this.bSide / 2, 0.0,
+            -this.aSide / 2, -this.bSide / 2, 0.0
         ];
     }
 }
 
 
 class Net extends Figure {
-    constructor(height, width, freq, color) {
-        super();
+    constructor(center, height, width, freq, color) {
+        super(center);
+        this.name = "Net";
         this.height = height;
         this.width = width;
         this.freq = freq+1;
         this.color = color;
-        this.center = [0.5, 0.5, 0.0];
     }
 
-    getColorMatrix(){
+    initBuffers(){
+        this.generateVerticesMatrix();
+        this.generateColorMatrix();
+        this.initPositionBuffer();
+        this.initColorBuffer();
+    }
+
+    generateColorMatrix(){
         let colors = [];
         for (let i=0; i < this.freq * 4; i++) {
             colors = colors.concat(this.color);
         }
-        return colors;
+        this.colors = colors;
     }
 
-    getVerticesMatrix(){
+    generateVerticesMatrix(){
         let vertices = [];
         let vertical_offset = this.height / (this.freq - 1);
         let horizontal_offset = this.width / (this.freq - 1);
@@ -253,27 +290,6 @@ class Net extends Figure {
             let low_point = [this.center[0] - this.width / 2 + i * horizontal_offset, this.center[1] - this.height / 2, 0.0];
             vertices = vertices.concat(top_point.concat(low_point));
         }
-        return vertices;
-    }
-}
-
-class Line extends Figure {
-    constructor(a, b ,color) {
-        super();
-        this.pointA = a;
-        this.pointB = b;
-        this.color = color;
-    }
-
-    getColorMatrix(){
-        let colors = [];
-        for (let i=0; i < 4; i++) {
-            colors = colors.concat(this.color);
-        }
-        return colors;
-    }
-
-    getVerticesMatrix(){
-        return this.pointA.concat(this.pointB);
+        this.vertices = vertices;
     }
 }

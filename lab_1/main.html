@@ -35,22 +35,33 @@
     <canvas height="500" id="central_canvas" style="border: none;" width="500"></canvas>
 </div>
 <div>
-    <label>
-        <select onchange="(this.value)">
-            <option value="Square">Square</option>
-            <option value="Circle">Circle</option>
-            <option value="Rectangle">Rectangle</option>
-        </select>
-    </label>
     <form>
         <label>
-            <input type="text" name="r_color">
-            <input type="text" name="g_color">
-            <input type="text" name="b_color">
-            <input type="text" name="a_component">
+            Change color for figure:
+            <select id="cur_figure" onchange="(this.value)">
+                <option value="Net">Net</option>
+                <option value="Circle">Circle</option>
+                <option value="Rectangle">Rectangle</option>
+            </select>
         </label>
     </form>
-    <button onclick="changeColor()">Change color</button>
+
+    <form>
+        Color in RGBA format (0-255):
+        <label>
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+        </label>
+    </form>
+    <form>
+        Line width:
+        <label>
+            <input id="line_width" type="number" min="0.5" max="10.0" step="0.5" value="1.0">
+        </label>
+    </form>
+    <button onclick="changeColor()">Let's go</button>
 </div>
 </body>
 </html>
