@@ -13,20 +13,28 @@ class Rectangle extends Figure {
         this.initPositionBuffer();
         this.initColorBuffer();
     }
+
+    // Special color like on picture
     generateColorMatrix(){
-        let colors = [];
-        for (let i=0; i < 4; i++) {
+        let colors = [1.0, 1.0, 1.0, 1.0];
+
+        for (let i=0; i < this.vertices.length/3 - 2; i++) {
             colors = colors.concat(this.color);
         }
+        colors = colors.concat([1.0, 1.0, 1.0, 1.0]);
         this.colors = colors;
     }
 
     generateVerticesMatrix(){
-        this.vertices = [
-            this.aSide / 2, this.bSide / 2, 0.0,
-            -this.aSide / 2, this.bSide / 2, 0.0,
-            this.aSide / 2, -this.bSide / 2, 0.0,
-            -this.aSide / 2, -this.bSide / 2, 0.0
-        ];
+        let vertices = this.center.toArray();
+        vertices = vertices.concat([
+            this.center.x + this.aSide / 2, this.center.y + this.bSide / 2, this.center.z,
+            this.center.x + this.aSide / 2, this.center.y - this.bSide / 2, this.center.z,
+            this.center.x - this.aSide / 2, this.center.y - this.bSide / 2, this.center.z,
+            this.center.x - this.aSide / 2, this.center.y + this.bSide / 2, this.center.z,
+            this.center.x + this.aSide / 2, this.center.y + this.bSide / 2, this.center.z
+        ]);
+        vertices = vertices.concat(this.center.toArray());
+        this.vertices = vertices;
     }
 }

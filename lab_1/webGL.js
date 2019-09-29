@@ -8,12 +8,13 @@ function webGLStart() {
     const canvas = document.getElementById("central_canvas");
     initGL(canvas);
     initShaders();
-    figures = [new Rectangle([0.0, 0.0, 0.0], 1, 3, [1.0, 0.0, 0.5, 1.0]),
-        new Net([2.0, 2.0, 0.0], 1, 1, 10, [0.0, 1.0, 0.0, 1.0]),
-        new Circle([-1.0, -1.0, 0.0], 1, [1.0, 0.0, 0.0, 1.0])
+    figures = [new Rectangle(new Point3(1.0, 0.0, 0.0), 2, 2, [0.0, 0.0, 0.0, 1.0]),
+        new Net(new Point3(0.0, 0.0, -1.0), 4, 4, 20, [1.0, 1.0, 1.0, 1.0]),
+        new Circle(new Point3(-1.0, -1.0, -2.0), 3, [1.0, 0.0, 0.5, 1.0])
     ];
     initBuffers();
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.5);
+    gl.lineWidth(3);
     gl.enable(gl.DEPTH_TEST);
 
     drawScene();
@@ -108,7 +109,7 @@ function drawScene() {
     //Draw Rectangle
     mat4.translate(mvMatrix, [0.0, 0.0, -7.0]);
     setBuffersToShaders(figures[0].getPositionBuffer(), figures[0].getColorBuffer());
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, figures[0].getPositionBuffer().numItems);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[0].getPositionBuffer().numItems);
 
     //Draw Net
     mat4.translate(mvMatrix, [-0.5, 0.0, 0.0]); // move view

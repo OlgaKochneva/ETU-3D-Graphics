@@ -18,7 +18,7 @@ class Net extends Figure {
 
     generateColorMatrix(){
         let colors = [];
-        for (let i=0; i < this.freq * 4; i++) {
+        for (let i=0; i < this.vertices.length / 3; i++) {
             colors = colors.concat(this.color);
         }
         this.colors = colors;
@@ -29,11 +29,11 @@ class Net extends Figure {
         let vertical_offset = this.height / (this.freq - 1);
         let horizontal_offset = this.width / (this.freq - 1);
         for(let i = 0; i < this.freq; i ++) {
-            let left_point = [this.center[0] - this.width / 2, (this.center[1] + this.height / 2) - i * vertical_offset, 0.0];
-            let right_point = [this.center[0] + this.width / 2, (this.center[1] + this.height / 2) - i * vertical_offset, 0.0];
+            let left_point = [this.center.x - this.width / 2, (this.center.y + this.height / 2) - i * vertical_offset, this.center.z];
+            let right_point = [this.center.x + this.width / 2, (this.center.y + this.height / 2) - i * vertical_offset, this.center.z];
             vertices = vertices.concat(left_point.concat(right_point));
-            let top_point = [this.center[0] - this.width / 2 + i * horizontal_offset, this.center[1] + this.height / 2, 0.0];
-            let low_point = [this.center[0] - this.width / 2 + i * horizontal_offset, this.center[1] - this.height / 2, 0.0];
+            let top_point = [this.center.x - this.width / 2 + i * horizontal_offset, this.center.y + this.height / 2, this.center.z];
+            let low_point = [this.center.x - this.width / 2 + i * horizontal_offset, this.center.y- this.height / 2, this.center.z];
             vertices = vertices.concat(top_point.concat(low_point));
         }
         this.vertices = vertices;
