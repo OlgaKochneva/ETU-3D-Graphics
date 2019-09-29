@@ -4,6 +4,10 @@
     <title>Great 3D scene</title>
     <meta content="text/html" http-equiv="content-type">
     <script src="sources/glMatrix-0.9.5.min.js" type="text/javascript"></script>
+    <script src="Figures/Figure.js" type="text/javascript"></script>
+    <script src="Figures/Circle.js" type="text/javascript"></script>
+    <script src="Figures/Net.js" type="text/javascript"></script>
+    <script src="Figures/Rectangle.js" type="text/javascript"></script>
     <script src="webGL.js" type="text/javascript"></script>
     <script id="shader-fs" type="x-shader/x-fragment">
         precision mediump float;
@@ -61,7 +65,7 @@
             <input id="line_width" type="number" min="0.5" max="10.0" step="0.5" value="1.0">
         </label>
     </form>
-    <button onclick="changeColor()">Let's go</button>
+    <button onclick="update_scene()">Let's go</button>
 </div>
 </body>
 </html>
