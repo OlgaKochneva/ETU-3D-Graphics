@@ -1,0 +1,72 @@
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <title>Great 3D scene</title>
+    <meta content="text/html" http-equiv="content-type">
+    <script src="sources/glMatrix-0.9.5.min.js" type="text/javascript"></script>
+    <script src="utilities.js" type="text/javascript"></script>
+    <script src="Figures/Figure.js" type="text/javascript"></script>
+    <script src="Figures/Circle.js" type="text/javascript"></script>
+    <script src="Figures/Net.js" type="text/javascript"></script>
+    <script src="Figures/Rectangle.js" type="text/javascript"></script>
+    <script src="webGL.js" type="text/javascript"></script>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_FragColor = vColor;
+         }
+    </script>
+
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec4 aVertexColor;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+            vColor = aVertexColor;
+        }
+
+    </script>
+</head>
+<body onload="webGLStart();">
+<div>
+    <canvas height="500" id="central_canvas" style="border: none;" width="500"></canvas>
+</div>
+<div>
+    <form>
+        <label>
+            Change color for figure:
+            <select id="cur_figure" onchange="(this.value)">
+                <option value="Net">Net</option>
+                <option value="Circle">Circle</option>
+                <option value="Rectangle">Rectangle</option>
+            </select>
+        </label>
+    </form>
+
+    <form>
+        Color in RGBA format (0-255):
+        <label>
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+            <input type="number" name="color" min="0" max="255" step="1" value="255">
+        </label>
+    </form>
+    <form>
+        Line width:
+        <label>
+            <input id="line_width" type="number" min="0.5" max="10.0" step="0.5" value="3.0">
+        </label>
+    </form>
+    <button onclick="update_scene()">Let's go</button>
+</div>
+</body>
+</html>
