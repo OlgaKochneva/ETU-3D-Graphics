@@ -9,3 +9,7 @@ class Point3 {
         return [this.x, this.y, this.z];
     }
 }
+
+function degToRad(degrees) {
+    return degrees * Math.PI / 180;
+}
