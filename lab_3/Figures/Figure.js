@@ -2,8 +2,10 @@ class Figure {
     constructor(center) {
         this.vertexPositionBuffer = gl.createBuffer();
         this.vertexColorBuffer = gl.createBuffer();
+        this.vertexIndexBuffer = gl.createBuffer();
         this.vertices = [];
         this.colors = [];
+        this.indices = [];
         this.center = center;
         this.angle = 0;
         this.scale = [1, 1, 1];
@@ -23,13 +25,10 @@ class Figure {
         this.vertexColorBuffer.numItems = this.colors.length / 4;
     }
 
-    // getPositionBuffer(){
-    //     return this.vertexPositionBuffer;
-    // }
-    //
-    // getColorBuffer(){
-    //     return this.vertexColorBuffer;
-    // }
-
-    set
+    initIndexBuffer(){
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+        this.vertexIndexBuffer.itemSize = 1;
+        this.vertexIndexBuffer.numItems = this.indices.length;
+    }
 }

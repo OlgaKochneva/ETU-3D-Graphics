@@ -2,12 +2,13 @@ class Rectangle extends Figure {
     constructor(center, a, b, color) {
         super(center);
         this.name = "Rectangle";
-        this.aSide = a;
-        this.bSide = b;
+        this.x = a / 2;
+        this.y = b / 2;
+        this.z = 1 / 2;
         this.color = color;
     }
 
-    initBuffers(){
+    initBuffers() {
         this.generateVerticesMatrix();
         this.generateColorMatrix();
         this.initPositionBuffer();
@@ -25,14 +26,14 @@ class Rectangle extends Figure {
         this.colors = colors;
     }
 
-    generateVerticesMatrix(){
+    generateVerticesMatrix() {
         let vertices = this.center.toArray();
         vertices = vertices.concat([
-            this.center.x + this.aSide / 2, this.center.y + this.bSide / 2, this.center.z,
-            this.center.x + this.aSide / 2, this.center.y - this.bSide / 2, this.center.z,
-            this.center.x - this.aSide / 2, this.center.y - this.bSide / 2, this.center.z,
-            this.center.x - this.aSide / 2, this.center.y + this.bSide / 2, this.center.z,
-            this.center.x + this.aSide / 2, this.center.y + this.bSide / 2, this.center.z
+            this.x, -this.y, -this.z,
+            this.x, -this.y, this.z,
+            -this.x, -this.y, this.z,
+            -this.x, -this.y, -this.z,
+            this.x, -this.y, -this.z
         ]);
         vertices = vertices.concat(this.center.toArray());
         this.vertices = vertices;

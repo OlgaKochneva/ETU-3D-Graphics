@@ -149,7 +149,7 @@ function drawScene() {
     setBuffersToShaders(figures[1].vertexPositionBuffer, figures[1].vertexColorBuffer);
     gl.drawArrays(gl.LINES, 0, figures[1].vertexPositionBuffer.numItems);
     mvPopMatrix();
-
+	//
     //Draw Circle
     mvPushMatrix();
     mat4.translate(mvMatrix, [0.0, -5.0, -20.0]); // move view
