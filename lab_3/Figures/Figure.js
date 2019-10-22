@@ -1,5 +1,5 @@
 class Figure {
-    constructor(center) {
+    constructor(center, angle, scale) {
         this.vertexPositionBuffer = gl.createBuffer();
         this.vertexColorBuffer = gl.createBuffer();
         this.vertexIndexBuffer = gl.createBuffer();
@@ -7,8 +7,8 @@ class Figure {
         this.colors = [];
         this.indices = [];
         this.center = center;
-        this.angle = 0;
-        this.scale = [1, 1, 1];
+        this.angle = angle;
+        this.scale = scale;
     }
 
     initPositionBuffer(){

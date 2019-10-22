@@ -1,10 +1,10 @@
 class Cube extends Figure {
-    constructor(center, a, b, color) {
-        super(center);
+    constructor(center, angle, scale, color) {
+        super(center, angle, scale);
         this.name = "Cube";
-        this.x = a / 2;
-        this.y = b / 2;
-        this.z = 1 / 2;
+        this.x = 1;
+        this.y = 1;
+        this.z = 1;
         this.color = color;
     }
 
@@ -20,22 +20,27 @@ class Cube extends Figure {
 
     // Special color like on picture
     generateColorMatrix() {
-        let colors = [
-            [1.0, 0.0, 0.0, 1.0],     // Front face
-            [1.0, 1.0, 0.0, 1.0],     // Back face
-            [0.0, 1.0, 0.0, 1.0],     // Top face
-            [1.0, 0.5, 0.5, 1.0],     // Bottom face
-            [1.0, 0.0, 1.0, 1.0],     // Right face
-            [0.0, 0.0, 1.0, 1.0],     // Left face
-        ];
-        let unpackedColors = [];
-        for (let i in colors) {
-            let color = colors[i];
-            for (let j=0; j < 4; j++) {
-                unpackedColors = unpackedColors.concat(color);
-            }
+        // let colors = [
+        //     [1.0, 0.0, 0.0, 1.0],     // Front face
+        //     [1.0, 1.0, 0.0, 1.0],     // Back face
+        //     [0.0, 1.0, 0.0, 1.0],     // Top face
+        //     [1.0, 0.5, 0.5, 1.0],     // Bottom face
+        //     [1.0, 0.0, 1.0, 1.0],     // Right face
+        //     [0.0, 0.0, 1.0, 1.0],     // Left face
+        // ];
+        // let unpackedColors = [];
+        // for (let i in colors) {
+        //     let color = colors[i];
+        //     for (let j=0; j < 4; j++) {
+        //         unpackedColors = unpackedColors.concat(color);
+        //     }
+        // }
+        // this.colors = unpackedColors;
+        let colors = [];
+        for (let i=0; i < this.vertices.length / 3; i++) {
+            colors = colors.concat(this.color);
         }
-        this.colors = unpackedColors;
+        this.colors = colors;
     }
 
     generateVerticesMatrix() {

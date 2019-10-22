@@ -1,10 +1,10 @@
 class Rectangle extends Figure {
-    constructor(center, a, b, color) {
-        super(center);
+    constructor(center, angle, scale, color) {
+        super(center, angle, scale);
         this.name = "Rectangle";
-        this.x = a / 2;
-        this.y = b / 2;
-        this.z = 1 / 2;
+        this.x = 1;
+        this.y = 1;
+        this.z = 1;
         this.color = color;
     }
 
@@ -27,7 +27,7 @@ class Rectangle extends Figure {
     }
 
     generateVerticesMatrix() {
-        let vertices = this.center.toArray();
+        let vertices = [0.0, 0.0, 0.0];
         vertices = vertices.concat([
             this.x, -this.y, -this.z,
             this.x, -this.y, this.z,
@@ -35,7 +35,7 @@ class Rectangle extends Figure {
             -this.x, -this.y, -this.z,
             this.x, -this.y, -this.z
         ]);
-        vertices = vertices.concat(this.center.toArray());
+        vertices = vertices.concat([0.0, 0.0, 0.0]);
         this.vertices = vertices;
     }
 }

@@ -9,10 +9,11 @@ function webGLStart() {
     initGL(canvas);
     initShaders();
     figures = [
-        // new Net(new Point3(0.0, 0.0, 0.0), 4, 4, 20, [1.0, 1.0, 1.0, 1.0]),
-        // new Circle(new Point3(0.0, -0.0, 0.0), 3, [1.0, 0.0, 0.5, 1.0]),
-        new Cube(new Point3(0.0, 0.0, 0.0), 1, 1, [0.0, 0.0, 0.0, 1.0]),
-        new Rectangle(new Point3(0.0, 0.0, 0.0), 1, 1, [0.0, 0.0, 0.0, 1.0])
+        new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0.0, 0.0, 0.0, 1.0]),
+        new Rectangle([0.0, -1.0, 0.0], 90, [100, 1, 100], [0.0, 0.0, 0.0, 1.0]),
+        new Net([5.0, 3.0, 1.0], 0, [8, 8, 0], 15, [128.0/255, 5.0/255, 48/255, 1.0]),
+        new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0.0, 0.0, 0.0, 1.0]),
+        new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0])
     ];
     initBuffers();
     gl.clearColor(0.0, 0.0, 0.0, 0.5);
@@ -129,39 +130,11 @@ function drawScene() {
 
     mat4.lookAt([xCameraPos, yCameraPos, zCameraPos], [0, 0, 0], [0, 1, 0], mvMatrix);
 
-
-    // //Draw Rectangle
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, [0.0, 0.0, -50.0]);
-    // mat4.scale(mvMatrix, [5, 5, 1]);
-    // mat4.rotate(mvMatrix, degToRad(45), [1, 1, 1]);
-    // setBuffersToShaders(figures[0].vertexPositionBuffer, figures[0].vertexColorBuffer);
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[0].vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw Net
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, [3.0, 0.0, -10.0]);
-    // mat4.scale(mvMatrix, [2, 2, 1]);
-    // mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
-    // setBuffersToShaders(figures[1].vertexPositionBuffer, figures[1].vertexColorBuffer);
-    // gl.drawArrays(gl.LINES, 0, figures[1].vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw Circle
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, [0.0, -5.0, -20.0]); // move view
-    // mat4.scale(mvMatrix, [2, 2, 1]);
-    // mat4.rotate(mvMatrix, degToRad(60), [1, 0, 0]);
-    // setBuffersToShaders(figures[2].vertexPositionBuffer, figures[2].vertexColorBuffer);
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[2].vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-
     //Draw Scene
     mvPushMatrix();
-    mat4.translate(mvMatrix, [0.0, -6.0, 0.0]);
-    mat4.scale(mvMatrix, [100, 1, 100]);
-    mat4.rotate(mvMatrix, degToRad(90), [0, 1, 0]);
+    mat4.translate(mvMatrix, figures[1].center);
+    mat4.scale(mvMatrix, figures[1].scale);
+    mat4.rotate(mvMatrix, degToRad(figures[1].angle), [0, 1, 0]);
     setBuffersToShaders(figures[1].vertexPositionBuffer, figures[1].vertexColorBuffer);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[1].vertexPositionBuffer.numItems);
@@ -169,13 +142,43 @@ function drawScene() {
 
     //Draw Cube
     mvPushMatrix();
-    mat4.translate(mvMatrix, [0.0, -3.0, 0.0]); // move view
-    mat4.scale(mvMatrix, [6, 1, 6]);
+    mat4.translate(mvMatrix, figures[0].center); // move view
+    mat4.scale(mvMatrix, figures[0].scale);
 
     setBuffersToShaders(figures[0].vertexPositionBuffer, figures[0].vertexColorBuffer);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures[0].vertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, figures[0].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvPopMatrix();
+    //Draw Cube
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[4].center); // move view
+    mat4.scale(mvMatrix, figures[4].scale);
+
+    setBuffersToShaders(figures[4].vertexPositionBuffer, figures[4].vertexColorBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures[4].vertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, figures[4].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvPopMatrix();
+
+    //Draw Net
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[2].center);
+    mat4.scale(mvMatrix, figures[2].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[2].vertexPositionBuffer, figures[2].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINES, 0, figures[2].vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    //Draw Net
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[3].center);
+    mat4.scale(mvMatrix, figures[3].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[3].vertexPositionBuffer, figures[3].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[3].vertexPositionBuffer.numItems);
     mvPopMatrix();
 
 }
@@ -206,7 +209,7 @@ function update_scene() {
 }
 
 let currentlyPressedKeys = {};
-let yCameraPos = 4, zCameraPos = 15, xCameraPos = 0;
+let yCameraPos = 4, zCameraPos = 24, xCameraPos = 0;
 
 function handleKeyDown(event) {
     currentlyPressedKeys[event.keyCode] = true;
@@ -232,11 +235,11 @@ function handleKeys() {
     }
     if (currentlyPressedKeys[39]) {
         // Right cursor key
-        xCameraPos = xCameraPos > -10 ? xCameraPos - 1 : xCameraPos;
+        xCameraPos = xCameraPos > -20 ? xCameraPos - 1 : xCameraPos;
     }
     if (currentlyPressedKeys[38]) {
         // Up cursor key
-        yCameraPos = yCameraPos < 10 ? yCameraPos + 1 : yCameraPos;
+        yCameraPos = yCameraPos < 20 ? yCameraPos + 1 : yCameraPos;
     }
     if (currentlyPressedKeys[40]) {
         // Down cursor key

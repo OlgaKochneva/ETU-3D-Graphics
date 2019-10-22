@@ -1,11 +1,13 @@
 
 class Net extends Figure {
-    constructor(center, height, width, freq, color) {
-        super(center);
+    constructor(center, angle, scale, freq, color) {
+        super(center, angle, scale);
         this.name = "Net";
-        this.height = height;
-        this.width = width;
-        this.freq = freq+1;
+        this.vertical_offset = 1 / 15;
+        this.horizontal_offset = 1 / 15;
+        this.height = freq * this.vertical_offset / 2;
+        this.width = freq * this.horizontal_offset / 2;
+        this.freq = freq + 1;
         this.color = color;
     }
 
@@ -26,14 +28,12 @@ class Net extends Figure {
 
     generateVerticesMatrix(){
         let vertices = [];
-        let vertical_offset = this.height / (this.freq - 1);
-        let horizontal_offset = this.width / (this.freq - 1);
         for(let i = 0; i < this.freq; i ++) {
-            let left_point = [this.center.x - this.width / 2, (this.center.y + this.height / 2) - i * vertical_offset, this.center.z];
-            let right_point = [this.center.x + this.width / 2, (this.center.y + this.height / 2) - i * vertical_offset, this.center.z];
+            let left_point = [-this.width, this.height - i * this.vertical_offset, 0];
+            let right_point = [this.width, this.height - i * this.vertical_offset, 0];
             vertices = vertices.concat(left_point.concat(right_point));
-            let top_point = [this.center.x - this.width / 2 + i * horizontal_offset, this.center.y + this.height / 2, this.center.z];
-            let low_point = [this.center.x - this.width / 2 + i * horizontal_offset, this.center.y- this.height / 2, this.center.z];
+            let top_point = [-this.width + i * this.horizontal_offset, this.height, 0];
+            let low_point = [-this.width + i * this.horizontal_offset, -this.height, 0];
             vertices = vertices.concat(top_point.concat(low_point));
         }
         this.vertices = vertices;
