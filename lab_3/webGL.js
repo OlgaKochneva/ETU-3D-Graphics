@@ -11,9 +11,13 @@ function webGLStart() {
     figures = [
         new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0.0, 0.0, 0.0, 1.0]),
         new Rectangle([0.0, -1.0, 0.0], 90, [100, 1, 100], [0.0, 0.0, 0.0, 1.0]),
-        new Net([5.0, 3.0, 1.0], 0, [8, 8, 0], 15, [128.0/255, 5.0/255, 48/255, 1.0]),
+        new Net([5.0, 3.0, 1.0], 0, [8, 8, 1], 15, [128.0/255, 5.0/255, 48/255, 1.0]),
         new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0.0, 0.0, 0.0, 1.0]),
-        new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0])
+        new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0]),
+        new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 0, 20, [0.0, 0.0, 1.0, 1.0]),
+        new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 6, 0, [0.0, 0.0, 1.0, 1.0]),
+        new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 0, 15, [37/255, 186/255, 65/255, 1.0]),
+        new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 4, 0, [37/255, 186/255, 65/255, 1.0])
     ];
     initBuffers();
     gl.clearColor(0.0, 0.0, 0.0, 0.5);
@@ -150,7 +154,8 @@ function drawScene() {
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, figures[0].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     mvPopMatrix();
-    //Draw Cube
+
+    //Draw Cube2
     mvPushMatrix();
     mat4.translate(mvMatrix, figures[4].center); // move view
     mat4.scale(mvMatrix, figures[4].scale);
@@ -171,7 +176,7 @@ function drawScene() {
     gl.drawArrays(gl.LINES, 0, figures[2].vertexPositionBuffer.numItems);
     mvPopMatrix();
 
-    //Draw Net
+    //Draw Cylinder
     mvPushMatrix();
     mat4.translate(mvMatrix, figures[3].center);
     mat4.scale(mvMatrix, figures[3].scale);
@@ -179,6 +184,48 @@ function drawScene() {
     setBuffersToShaders(figures[3].vertexPositionBuffer, figures[3].vertexColorBuffer);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_FAN, 0, figures[3].vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    gl.lineWidth(1);
+    //Draw NetCylinder
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[5].center);
+    mat4.scale(mvMatrix, figures[5].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[5].vertexPositionBuffer, figures[5].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINES, 0, figures[5].vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    //Draw NetCylinder
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[6].center);
+    mat4.scale(mvMatrix, figures[6].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[6].vertexPositionBuffer, figures[6].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINE_LOOP, 0, figures[6].vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    gl.lineWidth(3);
+    //Draw NetCylinder
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[7].center);
+    mat4.scale(mvMatrix, figures[7].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[7].vertexPositionBuffer, figures[7].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINES, 0, figures[7].vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    //Draw NetCylinder
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures[8].center);
+    mat4.scale(mvMatrix, figures[8].scale);
+    //mat4.rotate(mvMatrix, degToRad(-80), [0, 1, 0]);
+    setBuffersToShaders(figures[8].vertexPositionBuffer, figures[8].vertexColorBuffer);
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINE_LOOP, 0, figures[8].vertexPositionBuffer.numItems);
     mvPopMatrix();
 
 }

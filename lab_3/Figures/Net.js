@@ -3,8 +3,8 @@ class Net extends Figure {
     constructor(center, angle, scale, freq, color) {
         super(center, angle, scale);
         this.name = "Net";
-        this.vertical_offset = 1 / 15;
-        this.horizontal_offset = 1 / 15;
+        this.vertical_offset = 1 / freq;
+        this.horizontal_offset = 1 / freq;
         this.height = freq * this.vertical_offset / 2;
         this.width = freq * this.horizontal_offset / 2;
         this.freq = freq + 1;

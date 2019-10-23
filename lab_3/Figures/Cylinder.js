@@ -1,9 +1,9 @@
 class Cylinder extends Figure {
     constructor(center, angle, scale, color) {
         super(center, angle, scale);
-        this.name = "Rectangle";
+        this.name = "Cylinder";
         this.radius = 1;
-        this.height = 1;
+        this.height = 1/2;
         this.color = color;
     }
 
@@ -24,26 +24,16 @@ class Cylinder extends Figure {
     }
 
     generateVerticesMatrix() {
-        // generate vertices, normals and uvs
-        for ( let y = 0; y <= 30; y ++ ) {
-            var v = y / 30;
-
-            // calculate the radius of the current row
-            var radius = this.radius;
-
-            for (let x = 0; x <= 30; x ++ ) {
-                var u = x / 30;
-                var theta = u * Math.PI * 2;
-                var sinTheta = Math.sin( theta );
-                var cosTheta = Math.cos( theta );
-
-                // vertex
-                let vertex_x = radius * sinTheta;
-                let vertex_y = - v * this.height + this.height/2;
-                let vertex_z = radius * cosTheta;
-                this.vertices = this.vertices.concat(vertex_x, vertex_y, vertex_z );
-            }
-
+        let thetaOffset = 0.01;
+        let vertices = [0.0, 0.0, 0.0];
+        for(let theta = 0; theta < 2 * Math.PI; theta += thetaOffset) {
+            let x1  = this.radius * Math.cos(theta);
+            let z1 =  this.radius * Math.sin(theta);
+            let x2  =  this.radius * Math.cos(theta + thetaOffset);
+            let z2 = this.radius * Math.sin(theta + thetaOffset);
+            vertices.push(x1, this.height, z1, x2, this.height, z2)
+            vertices.push(x1, -this.height, z1, x2, -this.height, z2)
         }
+        this.vertices = vertices;
     }
 }
