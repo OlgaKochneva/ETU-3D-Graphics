@@ -3,24 +3,26 @@ let figures = {};
 let shaderProgram;
 let mvMatrix = mat4.create();
 let pMatrix = mat4.create();
+let strangeTexture;
 
 function webGLStart() {
     const canvas = document.getElementById("central_canvas");
     initGL(canvas);
     initShaders();
     figures = {
-        "cube": new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0.0, 0.0, 0.0, 1.0]),
-        "scene": new Rectangle([0.0, -1.0, 0.0], 90, [100, 1, 100], [0.0, 0.0, 0.0, 1.0]),
-        "net": new Net([5.0, 3.0, 1.0], 0, [8, 8, 1], 15, [0.5, 0.0, 0.2, 1.0]),
-        "thingCylinder": new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0.0, 0.0, 0.0, 1.0]),
-        "thingCube": new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0]),
-        "blueNetCylinderLines": new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 0, 20, [0.0, 0.0, 1.0, 1.0]),
-        "blueNetCylinderCircles": new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 6, 0, [0.0, 0.0, 1.0, 1.0]),
-        "greenNetCylinderLines": new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 0, 15, [0.1, 0.7, 0.3, 1.0]),
-        "greenNetCylinderCircles": new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 4, 0, [0.1, 0.7, 0.3, 1.0])
+        cube: new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0.0, 0.0, 0.0, 1.0]),
+        scene: new Rectangle([0.0, -1.0, 0.0], 90, [100, 1, 100], [0, 0, 0, 255]),
+        net: new Net([5.0, 3.0, 1.0], 0, [8, 8, 1], 15, [128, 0.0, 0.2*255, 255]),
+        thingCylinder: new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0.0, 0.0, 0.0, 1.0]),
+        thingCube: new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0]),
+        blueNetCylinderLines: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 0, 20, [0.0, 0.0, 255, 255]),
+        blueNetCylinderCircles: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 6, 0, [0.0, 0.0, 255, 255]),
+        greenNetCylinderLines: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 0, 15, [0.1*255, 0.7*255, 0.3*255, 255]),
+        greenNetCylinderCircles: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 4, 0, [0.1*255, 0.7*255, 0.3*255, 255])
     };
 
     initBuffers();
+    initTexture();
     gl.clearColor(0.0, 0.0, 0.0, 0.5);
     gl.lineWidth(3);
     gl.enable(gl.DEPTH_TEST);
@@ -69,6 +71,24 @@ function getShader(gl, id) {
     return shader;
 }
 
+function initTexture() {
+    strangeTexture = gl.createTexture();
+    strangeTexture.image = new Image();
+    strangeTexture.image.onload = function() {
+        handleLoadedTexture(strangeTexture);
+    };
+
+    strangeTexture.image.src = "nehe.gif";
+}
+
+function handleLoadedTexture(texture) {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
 
 function initShaders() {
     const fragmentShader = getShader(gl, "shader-fs");
@@ -88,11 +108,12 @@ function initShaders() {
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 }
 
 function setMatrixUniforms() {
@@ -103,7 +124,6 @@ function setMatrixUniforms() {
 function initBuffers() {
     for (let figureName in figures){
         figures[figureName].initBuffers();
-        alert(figureName);
     }
 }
 
@@ -142,6 +162,9 @@ function drawScene() {
     mat4.scale(mvMatrix, figures.scene.scale);
     mat4.rotate(mvMatrix, degToRad(figures.scene.angle), [0, 1, 0]);
     setBuffersToShaders(figures.scene.vertexPositionBuffer, figures.scene.vertexColorBuffer);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_FAN, 0, figures.scene.vertexPositionBuffer.numItems);
     mvPopMatrix();
@@ -150,7 +173,10 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.cube.center); // move view
     mat4.scale(mvMatrix, figures.cube.scale);
-    setBuffersToShaders(figures.cube.vertexPositionBuffer, figures.cube.vertexColorBuffer);
+    setBuffersToShaders(figures.cube.vertexPositionBuffer, figures.cube.vertexTextureCoordBuffer);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.cube.vertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, figures.cube.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -161,7 +187,10 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.thingCube.center); // move view
     mat4.scale(mvMatrix, figures.thingCube.scale);
-    setBuffersToShaders(figures.thingCube.vertexPositionBuffer, figures.thingCube.vertexColorBuffer);
+    setBuffersToShaders(figures.thingCube.vertexPositionBuffer, figures.thingCube.vertexTextureCoordBuffer);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.thingCube.vertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, figures.thingCube.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -171,12 +200,20 @@ function drawScene() {
     mat4.translate(mvMatrix, figures.thingCylinder.center);
     mat4.scale(mvMatrix, figures.thingCylinder.scale);
     setBuffersToShaders(figures.thingCylinder.vertexPositionBuffer, figures.thingCylinder.vertexColorBuffer);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.thingCube.vertexIndexBuffer);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_FAN, 0, figures.thingCylinder.vertexPositionBuffer.numItems);
     mvPopMatrix();
 
     //Draw Net
     gl.lineWidth(3);
+    let netTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, netTexture);
+    let netColor = new Uint8Array( figures.net.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netColor);
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.net.center);
     mat4.scale(mvMatrix, figures.net.scale);
@@ -187,6 +224,11 @@ function drawScene() {
 
     //Draw blue NetCylinder
     gl.lineWidth(1);
+    //Set NetCylinder color
+    let netCylinderTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
+    let netCylinderColor = new Uint8Array(figures.blueNetCylinderLines.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.blueNetCylinderLines.center);
     mat4.scale(mvMatrix, figures.blueNetCylinderLines.scale);
@@ -204,6 +246,12 @@ function drawScene() {
     mvPopMatrix();
 
     //Draw green NetCylinder
+    //Set netCylinder color
+    netCylinderTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
+    netCylinderColor = new Uint8Array(figures.greenNetCylinderLines.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
+
     gl.lineWidth(3);
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.greenNetCylinderLines.center);
@@ -224,12 +272,12 @@ function drawScene() {
 
 }
 
-function setBuffersToShaders(pos_buffer, color_buffer) {
-    gl.bindBuffer(gl.ARRAY_BUFFER, pos_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+function setBuffersToShaders(posBuffer, textureCoordsBuffer) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, posBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, color_buffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,  textureCoordsBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, textureCoordsBuffer.itemSize, gl.FLOAT, false, 0, 0);
 }
 
 function update_scene() {

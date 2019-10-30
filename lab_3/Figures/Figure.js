@@ -3,9 +3,11 @@ class Figure {
         this.vertexPositionBuffer = gl.createBuffer();
         this.vertexColorBuffer = gl.createBuffer();
         this.vertexIndexBuffer = gl.createBuffer();
+        this.vertexTextureCoordBuffer = gl.createBuffer();
         this.vertices = [];
         this.colors = [];
         this.indices = [];
+        this.textureCoords = [];
         this.center = center;
         this.angle = angle;
         this.scale = scale;
@@ -18,6 +20,12 @@ class Figure {
         this.vertexPositionBuffer.numItems = this.vertices.length / 3;
     }
 
+    initTextureCoords(){
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTextureCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureCoords), gl.STATIC_DRAW);
+        this.vertexTextureCoordBuffer.itemSize = 2;
+        this.vertexTextureCoordBuffer.numItems = 24;
+    }
     initColorBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexColorBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);

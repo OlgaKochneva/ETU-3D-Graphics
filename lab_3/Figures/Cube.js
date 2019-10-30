@@ -10,14 +10,55 @@ class Cube extends Figure {
 
     initBuffers() {
          this.generateVerticesMatrix();
-         this.generateColorMatrix();
+         //this.generateColorMatrix();
+         this.generateTextureCoords();
          this.generateIndexesMatrix();
 
          this.initPositionBuffer();
-         this.initColorBuffer();
+         //this.initColorBuffer();
+         this.initTextureCoords();
          this.initIndexBuffer();
     }
 
+    generateTextureCoords(){
+        this.textureCoords = [
+            // Front face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+
+            // Back face
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+
+            // Top face
+            0.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+
+            // Bottom face
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+
+            // Right face
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            0.0, 0.0,
+
+            // Left face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+        ];
+    }
     // Special color like on picture
     generateColorMatrix() {
         // let colors = [
