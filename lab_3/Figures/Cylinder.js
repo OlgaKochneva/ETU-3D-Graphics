@@ -9,10 +9,10 @@ class Cylinder extends Figure {
 
     initBuffers() {
         this.generateVerticesMatrix();
-        this.generateColorMatrix();
         this.initPositionBuffer();
-        this.initColorBuffer();
+        this.initTextureCoords();
     }
+
 
     // Special color like on picture
     generateColorMatrix(){
@@ -25,14 +25,16 @@ class Cylinder extends Figure {
 
     generateVerticesMatrix() {
         let thetaOffset = 0.01;
-        let vertices = [0.0, 0.0, 0.0];
-        for(let theta = 0; theta < 2 * Math.PI; theta += thetaOffset) {
+        let vertices = [];
+        for(let theta = 0; theta <= 2 * Math.PI; theta += thetaOffset) {
             let x1  = this.radius * Math.cos(theta);
             let z1 =  this.radius * Math.sin(theta);
             let x2  =  this.radius * Math.cos(theta + thetaOffset);
             let z2 = this.radius * Math.sin(theta + thetaOffset);
-            vertices.push(x1, this.height, z1, x2, this.height, z2)
-            vertices.push(x1, -this.height, z1, x2, -this.height, z2)
+            vertices.push(x1, this.height, z1, x2, this.height, z2);
+            this.textureCoords.push(theta /  (2 * Math.PI), 1.0, (theta + thetaOffset) /  (2 * Math.PI), 1.0);
+            vertices.push(x1, -this.height, z1, x2, -this.height, z2);
+            this.textureCoords.push(theta /  (2 * Math.PI), 0.0, (theta + thetaOffset) /  (2 * Math.PI), 0.0);
         }
         this.vertices = vertices;
     }

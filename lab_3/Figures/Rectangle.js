@@ -10,9 +10,10 @@ class Rectangle extends Figure {
 
     initBuffers() {
         this.generateVerticesMatrix();
-        this.generateColorMatrix();
+        this.generateTextureCoords();
+
         this.initPositionBuffer();
-        this.initColorBuffer();
+        this.initTextureCoords();
     }
 
     // Special color like on picture
@@ -27,15 +28,21 @@ class Rectangle extends Figure {
     }
 
     generateVerticesMatrix() {
-        let vertices = [0.0, 0.0, 0.0];
-        vertices = vertices.concat([
-            this.x, -this.y, -this.z,
-            this.x, -this.y, this.z,
-            -this.x, -this.y, this.z,
-            -this.x, -this.y, -this.z,
-            this.x, -this.y, -this.z
-        ]);
-        vertices = vertices.concat([0.0, 0.0, 0.0]);
-        this.vertices = vertices;
+        this.vertices = [
+            -this.x, this.y, -this.z,
+            -this.x, this.y, this.z,
+            this.x, this.y, this.z,
+            this.x, this.y, -this.z,
+        ]
+    }
+
+    generateTextureCoords(){
+        this.textureCoords = [
+            // Front face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+        ];
     }
 }

@@ -4,27 +4,28 @@ let shaderProgram;
 let mvMatrix = mat4.create();
 let pMatrix = mat4.create();
 let strangeTexture;
+let sceneTexture;
 
 function webGLStart() {
     const canvas = document.getElementById("central_canvas");
     initGL(canvas);
     initShaders();
     figures = {
-        cube: new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0.0, 0.0, 0.0, 1.0]),
-        scene: new Rectangle([0.0, -1.0, 0.0], 90, [100, 1, 100], [0, 0, 0, 255]),
-        net: new Net([5.0, 3.0, 1.0], 0, [8, 8, 1], 15, [128, 0.0, 0.2*255, 255]),
-        thingCylinder: new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0.0, 0.0, 0.0, 1.0]),
-        thingCube: new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0.0, 0.0, 0.0, 1.0]),
-        blueNetCylinderLines: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 0, 20, [0.0, 0.0, 255, 255]),
-        blueNetCylinderCircles: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 6, 0, [0.0, 0.0, 255, 255]),
-        greenNetCylinderLines: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 0, 15, [0.1*255, 0.7*255, 0.3*255, 255]),
-        greenNetCylinderCircles: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 4, 0, [0.1*255, 0.7*255, 0.3*255, 255])
+        cube: new Cube([-5.0, 0.0, 0.0], 0, [5, 1, 5], [0, 0, 0, 255]),
+        scene: new Rectangle([0.0, -2, 0.0], 90, [30, 1, 30], [0, 0, 0, 255]),
+        net: new Net([5.0, 3.0, 1.0], 0, [8, 8, 1], 15, [2, 32, 36, 255]),
+        thingCylinder: new Cylinder([5.0, 2.0, -10.0], 0, [3, 6, 3], [0, 0, 0, 255]),
+        thingCube: new Cube([5.0, 6.0, -10.0], 0, [4, 2, 4], [0, 0, 0, 255]),
+        blueNetCylinderLines: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 0, 20, [145, 2, 201, 255]),
+        blueNetCylinderCircles: new NetCylinder([-5.0, 5.0, -10.0], 0, [3, 4, 3], 6, 0, [145, 2, 201, 255]),
+        greenNetCylinderLines: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 0, 15, [255, 255, 255, 255]),
+        greenNetCylinderCircles: new NetCylinder([-5.0, 1.0, -10.0], 0, [3, 4, 3], 4, 0, [255, 255, 255, 255])
     };
 
     initBuffers();
-    initTexture();
-    gl.clearColor(0.0, 0.0, 0.0, 0.5);
-    gl.lineWidth(3);
+    strangeTexture  = initTexture('strange.jpg');
+    sceneTexture  = initTexture('scene2.jpg');
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     document.onkeyup = handleKeyUp;
     document.onkeydown = handleKeyDown;
@@ -71,23 +72,43 @@ function getShader(gl, id) {
     return shader;
 }
 
-function initTexture() {
-    strangeTexture = gl.createTexture();
-    strangeTexture.image = new Image();
-    strangeTexture.image.onload = function() {
-        handleLoadedTexture(strangeTexture);
-    };
-
-    strangeTexture.image.src = "nehe.gif";
-}
-
-function handleLoadedTexture(texture) {
+function initTexture(url) {
+    const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 1;
+    const height = 1;
+    const border = 0;
+    const srcFormat = gl.RGBA;
+    const srcType = gl.UNSIGNED_BYTE;
+    const pixel = new Uint8Array([255, 255, 255, 255]);
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+        width, height, border, srcFormat, srcType,
+        pixel);
+
+    const image = new Image();
+    image.onload = function() {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+            srcFormat, srcType, image);
+        // У WebGL1 иные требования к изображениям, имеющим размер степени 2,
+        // и к не имеющим размер степени 2, поэтому проверяем, что изображение
+        // имеет размер степени 2 в обеих измерениях.
+        if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+            // Размер соответствует степени 2. Создаем MIP'ы.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            // Размер не соответствует степени 2.
+            // Отключаем MIP'ы и устанавливаем натяжение по краям
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    };
+    image.src = url;
+
+    return texture;
 }
 
 function initShaders() {
@@ -161,9 +182,9 @@ function drawScene() {
     mat4.translate(mvMatrix, figures.scene.center);
     mat4.scale(mvMatrix, figures.scene.scale);
     mat4.rotate(mvMatrix, degToRad(figures.scene.angle), [0, 1, 0]);
-    setBuffersToShaders(figures.scene.vertexPositionBuffer, figures.scene.vertexColorBuffer);
+    setBuffersToShaders(figures.scene.vertexPositionBuffer, figures.scene.vertexTextureCoordBuffer);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.bindTexture(gl.TEXTURE_2D, sceneTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_FAN, 0, figures.scene.vertexPositionBuffer.numItems);
@@ -199,7 +220,7 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.thingCylinder.center);
     mat4.scale(mvMatrix, figures.thingCylinder.scale);
-    setBuffersToShaders(figures.thingCylinder.vertexPositionBuffer, figures.thingCylinder.vertexColorBuffer);
+    setBuffersToShaders(figures.thingCylinder.vertexPositionBuffer, figures.thingCylinder.vertexTextureCoordBuffer);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -320,7 +341,7 @@ function handleKeys() {
     }
     if (currentlyPressedKeys[37]) {
         // Left cursor key
-        xCameraPos = xCameraPos < 10 ? xCameraPos + 1 : xCameraPos;
+        xCameraPos = xCameraPos < 20 ? xCameraPos + 1 : xCameraPos;
     }
     if (currentlyPressedKeys[39]) {
         // Right cursor key
@@ -332,7 +353,7 @@ function handleKeys() {
     }
     if (currentlyPressedKeys[40]) {
         // Down cursor key
-        yCameraPos = yCameraPos > -10 ? yCameraPos - 1 : yCameraPos;
+        yCameraPos = yCameraPos > -20 ? yCameraPos - 1 : yCameraPos;
     }
     drawScene();
 }

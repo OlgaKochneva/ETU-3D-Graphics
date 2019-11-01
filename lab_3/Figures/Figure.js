@@ -24,7 +24,7 @@ class Figure {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTextureCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureCoords), gl.STATIC_DRAW);
         this.vertexTextureCoordBuffer.itemSize = 2;
-        this.vertexTextureCoordBuffer.numItems = 24;
+        this.vertexTextureCoordBuffer.numItems = this.textureCoords / 2;
     }
     initColorBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexColorBuffer);
