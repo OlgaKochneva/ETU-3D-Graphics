@@ -11,9 +11,11 @@ class Rectangle extends Figure {
     initBuffers() {
         this.generateVerticesMatrix();
         this.generateTextureCoords();
+        this.generateNormales();
 
         this.initPositionBuffer();
         this.initTextureCoords();
+        this.initNormalesBuffer();
     }
 
     // Special color like on picture
@@ -32,8 +34,18 @@ class Rectangle extends Figure {
             -this.x, this.y, -this.z,
             -this.x, this.y, this.z,
             this.x, this.y, this.z,
-            this.x, this.y, -this.z,
-        ]
+            this.x, this.y, -this.z
+        ];
+    }
+
+    generateNormales(){
+        this.vertexNormals = [
+            // Top face
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+            0.0,  1.0,  0.0,
+        ];
     }
 
     generateTextureCoords(){

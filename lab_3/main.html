@@ -16,26 +16,46 @@
         precision mediump float;
 
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
         uniform sampler2D uSampler;
 
         void main(void) {
-        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
         }
     </script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
         attribute vec3 aVertexPosition;
+        attribute vec3 aVertexNormal;
         attribute vec2 aTextureCoord;
 
         uniform mat4 uMVMatrix;
         uniform mat4 uPMatrix;
+        uniform mat3 uNMatrix;
+
+        uniform vec3 uAmbientColor;
+
+        uniform vec3 uLightingDirection;
+        uniform vec3 uDirectionalColor;
+
+        uniform bool uUseLighting;
 
         varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
 
         void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vTextureCoord = aTextureCoord;
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+            vTextureCoord = aTextureCoord;
+
+            if (!uUseLighting) {
+                vLightWeighting = vec3(1.0, 1.0, 1.0);
+            } else {
+                vec3 transformedNormal = uNMatrix * aVertexNormal;
+                float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+                vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+            }
         }
     </script>
 </head>
@@ -43,6 +63,36 @@
 <div>
     <canvas height="500" id="central_canvas" style="border: none;" width="500"></canvas>
 </div>
+<br />
+<input type="checkbox" id="lighting" checked onchange="drawScene()"/> Use lighting<br/>
+<br/>
+<h2>Directional light:</h2>
+
+<table style="border: 0; padding: 10px;">
+    <tr>
+        <td><b>Direction:</b>
+        <td>X: <input type="text" id="lightDirectionX" value="-0.25" onchange="drawScene()"/>
+        <td>Y: <input type="text" id="lightDirectionY" value="-0.25" onchange="drawScene()"/>
+        <td>Z: <input type="text" id="lightDirectionZ" value="-1.0" onchange="drawScene()"/>
+    </tr>
+    <tr>
+        <td><b>Colour:</b>
+        <td>R: <input type="text" id="directionalR" value="0.8" onchange="drawScene()"/>
+        <td>G: <input type="text" id="directionalG" value="0.8" onchange="drawScene()"/>
+        <td>B: <input type="text" id="directionalB" value="0.8" onchange="drawScene()"/>
+    </tr>
+</table>
+
+<h2>Ambient light:</h2>
+<table style="border: 0; padding: 10px;">
+    <tr>
+        <td><b>Colour:</b>
+        <td>R: <input type="text" id="ambientR" value="0.2" onchange="drawScene()"/>
+        <td>G: <input type="text" id="ambientG" value="0.2" onchange="drawScene()"/>
+        <td>B: <input type="text" id="ambientB" value="0.2" onchange="drawScene()"/>
+    </tr>
+</table>
+
 <div>
     <label>
         Ortho <input type="checkbox" id="ortho" onchange="drawScene()">

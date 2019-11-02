@@ -4,9 +4,11 @@ class Figure {
         this.vertexColorBuffer = gl.createBuffer();
         this.vertexIndexBuffer = gl.createBuffer();
         this.vertexTextureCoordBuffer = gl.createBuffer();
+        this.vertexNormalBuffer = gl.createBuffer();
         this.vertices = [];
         this.colors = [];
         this.indices = [];
+        this.vertexNormals = [];
         this.textureCoords = [];
         this.center = center;
         this.angle = angle;
@@ -39,4 +41,12 @@ class Figure {
         this.vertexIndexBuffer.itemSize = 1;
         this.vertexIndexBuffer.numItems = this.indices.length;
     }
+
+    initNormalesBuffer(){
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals), gl.STATIC_DRAW);
+        this.vertexNormalBuffer.itemSize = 3;
+        this.vertexNormalBuffer.numItems = this.vertexNormals / 3;
+    }
+
 }
