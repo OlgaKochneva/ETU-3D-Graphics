@@ -1,20 +1,18 @@
 class Rectangle extends Figure {
     constructor(center, angle, scale, color) {
-        super(center, angle, scale);
-        this.name = "Rectangle";
+        super(center, angle, scale, color);
         this.x = 1;
         this.y = 1;
         this.z = 1;
-        this.color = color;
     }
 
     initBuffers() {
         this.generateVerticesMatrix();
         this.generateTextureCoords();
-        this.generateNormales();
+        this.generateNormalesMatrix();
 
         this.initPositionBuffer();
-        this.initTextureCoords();
+        this.initTextureCoordsBuffer();
         this.initNormalesBuffer();
     }
 
@@ -38,8 +36,8 @@ class Rectangle extends Figure {
         ];
     }
 
-    generateNormales(){
-        this.vertexNormals = [
+    generateNormalesMatrix(){
+        this.vertexNormales = [
             // Top face
             0.0,  1.0,  0.0,
             0.0,  1.0,  0.0,

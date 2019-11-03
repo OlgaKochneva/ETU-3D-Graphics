@@ -3,8 +3,11 @@ let figures = {};
 let shaderProgram;
 let mvMatrix = mat4.create();
 let pMatrix = mat4.create();
+let mvMatrixStack = [];
 let strangeTexture;
 let sceneTexture;
+let currentlyPressedKeys = {};
+let yCameraPos = 4, zCameraPos = 24, xCameraPos = 0;
 
 function webGLStart() {
     const canvas = document.getElementById("central_canvas");
@@ -92,11 +95,7 @@ function initTexture(url) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
             srcFormat, srcType, image);
-        // У WebGL1 иные требования к изображениям, имеющим размер степени 2,
-        // и к не имеющим размер степени 2, поэтому проверяем, что изображение
-        // имеет размер степени 2 в обеих измерениях.
         if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-            // Размер соответствует степени 2. Создаем MIP'ы.
             gl.generateMipmap(gl.TEXTURE_2D);
         } else {
             // Размер не соответствует степени 2.
@@ -107,7 +106,6 @@ function initTexture(url) {
         }
     };
     image.src = url;
-
     return texture;
 }
 
@@ -161,8 +159,6 @@ function initBuffers() {
     }
 }
 
-let mvMatrixStack = [];
-
 function mvPushMatrix() {
     let copy = mat4.create();
     mat4.set(mvMatrix, copy);
@@ -180,15 +176,9 @@ function drawScene() {
     gl.enable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    if (document.getElementById("ortho").checked){
-        mat4.ortho(-gl.viewportWidth / 100, gl.viewportWidth/100, -gl.viewportHeight/100, gl.viewportHeight/100, 0.1, 100.0, pMatrix);
-    }
-    else {
-        mat4.perspective(60, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-    }
-
+    mat4.perspective(60, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
     mat4.lookAt([xCameraPos, yCameraPos, zCameraPos], [0, 0, 0], [0, 1, 0], mvMatrix);
+
     //light
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
@@ -246,7 +236,6 @@ function drawScene() {
     mvPopMatrix();
 
     //Draw strange cube-cylinder thing
-
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.thingCube.center); // move view
     mat4.scale(mvMatrix, figures.thingCube.scale);
@@ -345,26 +334,6 @@ function setBuffersToShaders(posBuffer, textureCoordsBuffer) {
     gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, textureCoordsBuffer.itemSize, gl.FLOAT, false, 0, 0);
 }
 
-function update_scene() {
-    let cur_figure = document.getElementById("cur_figure").value;
-    let color_list = document.getElementsByName("color");
-    let color = [];
-    for (let i = 0; i < color_list.length; i++) {
-        color.push(color_list[i].value / 255)
-    }
-    gl.lineWidth(document.getElementById("line_width").value);
-    for (let i = 0; i < figures.length; i++) {
-        if (cur_figure == figures[i].name) {
-            figures[i].color = color;
-            figures[i].initBuffers();
-        }
-    }
-    drawScene();
-}
-
-let currentlyPressedKeys = {};
-let yCameraPos = 4, zCameraPos = 24, xCameraPos = 0;
-
 function handleKeyDown(event) {
     currentlyPressedKeys[event.keyCode] = true;
     handleKeys();
@@ -393,11 +362,11 @@ function handleKeys() {
     }
     if (currentlyPressedKeys[38]) {
         // Up cursor key
-        yCameraPos = yCameraPos < 20 ? yCameraPos + 1 : yCameraPos;
+        yCameraPos = yCameraPos < 100 ? yCameraPos + 1 : yCameraPos;
     }
     if (currentlyPressedKeys[40]) {
         // Down cursor key
-        yCameraPos = yCameraPos > -20 ? yCameraPos - 1 : yCameraPos;
+        yCameraPos = yCameraPos > -100 ? yCameraPos - 1 : yCameraPos;
     }
     drawScene();
 }

@@ -69,68 +69,30 @@
 <br />
 <input type="checkbox" id="lighting" checked onchange="drawScene()"/> Use lighting<br/>
 <br/>
-<h2>Point light:</h2>
-
+Point light:
 <table style="border: 0; padding: 10px;">
     <tr>
         <td><b>Location:</b>
-        <td>X: <input type="text" id="lightPositionX" value="0.0"  onchange="drawScene()"/>
-        <td>Y: <input type="text" id="lightPositionY" value="0.0"  onchange="drawScene()"/>
-        <td>Z: <input type="text" id="lightPositionZ" value="-20.0"  onchange="drawScene()"/>
+        <td>X: <input id="lightPositionX" type="number" step="0.1" value="0.0"  onchange="drawScene()"/>
+        <td>Y: <input id="lightPositionY" type="number" step="0.1" value="0.0"  onchange="drawScene()"/>
+        <td>Z: <input id="lightPositionZ" type="number" step="0.1" value="-20.0"  onchange="drawScene()"/>
     </tr>
     <tr>
         <td><b>Colour:</b>
-        <td>R: <input type="text" id="pointR" value="0.8"  onchange="drawScene()"/>
-        <td>G: <input type="text" id="pointG" value="0.8"  onchange="drawScene()"/>
-        <td>B: <input type="text" id="pointB" value="0.8"  onchange="drawScene()"/>
+        <td>R: <input id="pointR" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
+        <td>G: <input id="pointG" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
+        <td>B: <input id="pointB" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
     </tr>
 </table>
-
-<h2>Ambient light:</h2>
-
+Ambient light:
 <table style="border: 0; padding: 10px;">
     <tr>
         <td><b>Colour:</b>
-        <td>R: <input type="text" id="ambientR" value="0.2"  onchange="drawScene()"/>
-        <td>G: <input type="text" id="ambientG" value="0.2"  onchange="drawScene()"/>
-        <td>B: <input type="text" id="ambientB" value="0.2"  onchange="drawScene()"/>
+        <td>R: <input id="ambientR" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
+        <td>G: <input id="ambientG" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
+        <td>B: <input id="ambientB" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
     </tr>
 </table>
 <br/>
-
-<div>
-    <label>
-        Ortho <input type="checkbox" id="ortho" onchange="drawScene()">
-    </label>
-</div>
-<!--<div>-->
-<!--    <form>-->
-<!--        <label>-->
-<!--            Change color for figure:-->
-<!--            <select id="cur_figure" onchange="(this.value)">-->
-<!--                <option value="Net">Net</option>-->
-<!--                <option value="Circle">Circle</option>-->
-<!--                <option value="Rectangle">Rectangle</option>-->
-<!--            </select>-->
-<!--        </label>-->
-<!--    </form>-->
-
-<!--    <form>-->
-<!--        Color in RGBA format (0-255):-->
-<!--        <label>-->
-<!--            <input type="number" name="color" min="0" max="255" step="1" value="255">-->
-<!--            <input type="number" name="color" min="0" max="255" step="1" value="255">-->
-<!--            <input type="number" name="color" min="0" max="255" step="1" value="255">-->
-<!--            <input type="number" name="color" min="0" max="255" step="1" value="255">-->
-<!--        </label>-->
-<!--    </form>-->
-<!--    <form>-->
-<!--        Line width:-->
-<!--        <label>-->
-<!--            <input id="line_width" type="number" min="0.5" max="10.0" step="0.5" value="3.0">-->
-<!--        </label>-->
-<!--    </form>-->
-<!--    <button onclick="update_scene()">Let's go</button>-->
-<!--</div>-->
 </body>
 </html>

@@ -1,5 +1,5 @@
 class Figure {
-    constructor(center, angle, scale) {
+    constructor(center, angle, scale, color) {
         this.vertexPositionBuffer = gl.createBuffer();
         this.vertexColorBuffer = gl.createBuffer();
         this.vertexIndexBuffer = gl.createBuffer();
@@ -8,11 +8,12 @@ class Figure {
         this.vertices = [];
         this.colors = [];
         this.indices = [];
-        this.vertexNormals = [];
+        this.vertexNormales = [];
         this.textureCoords = [];
         this.center = center;
         this.angle = angle;
         this.scale = scale;
+        this.color = color;
     }
 
     initPositionBuffer(){
@@ -22,7 +23,7 @@ class Figure {
         this.vertexPositionBuffer.numItems = this.vertices.length / 3;
     }
 
-    initTextureCoords(){
+    initTextureCoordsBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTextureCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureCoords), gl.STATIC_DRAW);
         this.vertexTextureCoordBuffer.itemSize = 2;
@@ -44,9 +45,9 @@ class Figure {
 
     initNormalesBuffer(){
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormales), gl.STATIC_DRAW);
         this.vertexNormalBuffer.itemSize = 3;
-        this.vertexNormalBuffer.numItems = this.vertexNormals / 3;
+        this.vertexNormalBuffer.numItems = this.vertexNormales / 3;
     }
 
 }
