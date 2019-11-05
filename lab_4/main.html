@@ -1,0 +1,98 @@
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <title>Great 3D scene</title>
+    <meta content="text/html" http-equiv="content-type">
+    <script src="../sources/glMatrix-0.9.5.min.js" type="text/javascript"></script>
+    <script src="utilities.js" type="text/javascript"></script>
+    <script src="Figures/Figure.js" type="text/javascript"></script>
+    <script src="Figures/Cylinder.js" type="text/javascript"></script>
+    <script src="Figures/NetCylinder.js" type="text/javascript"></script>
+    <script src="Figures/Net.js" type="text/javascript"></script>
+    <script src="Figures/Rectangle.js" type="text/javascript"></script>
+    <script src="Figures/Cube.js" type="text/javascript"></script>
+    <script src="webGL.js" type="text/javascript"></script>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
+
+        uniform sampler2D uSampler;
+
+        void main(void) {
+            vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+        }
+    </script>
+
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec3 aVertexNormal;
+        attribute vec2 aTextureCoord;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        uniform mat3 uNMatrix;
+
+        uniform vec3 uAmbientColor;
+
+        uniform vec3 uPointLightingLocation;
+        uniform vec3 uPointLightingColor;
+
+        uniform bool uUseLighting;
+
+        varying vec2 vTextureCoord;
+        varying vec3 vLightWeighting;
+
+        void main(void) {
+            vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+            gl_Position = uPMatrix * mvPosition;
+            vTextureCoord = aTextureCoord;
+
+            if (!uUseLighting) {
+                vLightWeighting = vec3(1.0, 1.0, 1.0);
+            } else {
+                vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+
+                vec3 transformedNormal = uNMatrix * aVertexNormal;
+                float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
+                vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+            }
+        }
+    </script>
+</head>
+<body onload="webGLStart()">
+<div>
+    <canvas height="500" id="central_canvas" style="border: none;" width="500"></canvas>
+</div>
+<br />
+<input type="checkbox" id="lighting" checked onchange="drawScene()"/> Use lighting<br/>
+<br/>
+Point light:
+<table style="border: 0; padding: 10px;">
+    <tr>
+        <td><b>Location:</b>
+        <td>X: <input id="lightPositionX" type="number" step="0.1" value="0.0"  onchange="drawScene()"/>
+        <td>Y: <input id="lightPositionY" type="number" step="0.1" value="0.0"  onchange="drawScene()"/>
+        <td>Z: <input id="lightPositionZ" type="number" step="0.1" value="-20.0"  onchange="drawScene()"/>
+    </tr>
+    <tr>
+        <td><b>Colour:</b>
+        <td>R: <input id="pointR" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
+        <td>G: <input id="pointG" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
+        <td>B: <input id="pointB" type="number" step="0.05" value="0.8"  onchange="drawScene()"/>
+    </tr>
+</table>
+Ambient light:
+<table style="border: 0; padding: 10px;">
+    <tr>
+        <td><b>Colour:</b>
+        <td>R: <input id="ambientR" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
+        <td>G: <input id="ambientG" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
+        <td>B: <input id="ambientB" type="number" step="0.05" value="0.2"  onchange="drawScene()"/>
+    </tr>
+</table>
+<br/>
+</body>
+</html>
