@@ -26,8 +26,8 @@ function webGLStart() {
     };
 
     initBuffers();
-    strangeTexture  = initTexture('strange.jpg');
-    sceneTexture  = initTexture('scene.jpg');
+    strangeTexture  = initTexture('sources/textures/strange.jpg');
+    sceneTexture  = initTexture('sources/textures/scene.jpg');
     gl.clearColor(0.5, 0.5, 0.6, 1.0);
     gl.enable(gl.DEPTH_TEST);
     document.onkeyup = handleKeyUp;
