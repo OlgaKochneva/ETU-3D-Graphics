@@ -1,4 +1,3 @@
-
 class Net extends Figure {
     constructor(center, angle, scale, freq, color) {
         super(center, angle, scale, color);

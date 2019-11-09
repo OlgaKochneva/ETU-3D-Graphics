@@ -178,6 +178,10 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     mat4.perspective(60, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
     mat4.lookAt([xCameraPos, yCameraPos, zCameraPos], [0, 0, 0], [0, 1, 0], mvMatrix);
+    let light = [
+        parseFloat(document.getElementById("lightPositionX").value),
+        parseFloat(document.getElementById("lightPositionY").value),
+        parseFloat(document.getElementById("lightPositionZ").value)];
 
     //light
     var lighting = document.getElementById("lighting").checked;
@@ -205,14 +209,15 @@ function drawScene() {
         );
     }
 
-    //Draw Scene
+    // Draw Scene
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.scene.center);
     mat4.scale(mvMatrix, figures.scene.scale);
     mat4.rotate(mvMatrix, degToRad(figures.scene.angle), [0, 1, 0]);
-    setBuffersToShaders(figures.scene.vertexPositionBuffer, figures.scene.vertexTextureCoordBuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, figures.scene.vertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, figures.scene.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    setBuffersToShaders(figures.scene.vertexPositionBuffer,
+        figures.scene.vertexTextureCoordBuffer,
+        figures.scene.vertexNormalBuffer
+    );
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, sceneTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -224,9 +229,11 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.cube.center); // move view
     mat4.scale(mvMatrix, figures.cube.scale);
-    setBuffersToShaders(figures.cube.vertexPositionBuffer, figures.cube.vertexTextureCoordBuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, figures.cube.vertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, figures.cube.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    setBuffersToShaders(
+        figures.cube.vertexPositionBuffer,
+        figures.cube.vertexTextureCoordBuffer,
+        figures.cube.vertexNormalBuffer
+        );
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -239,7 +246,11 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.thingCube.center); // move view
     mat4.scale(mvMatrix, figures.thingCube.scale);
-    setBuffersToShaders(figures.thingCube.vertexPositionBuffer, figures.thingCube.vertexTextureCoordBuffer);
+    setBuffersToShaders(
+        figures.thingCube.vertexPositionBuffer,
+        figures.thingCube.vertexTextureCoordBuffer,
+        figures.thingCube.vertexNormalBuffer
+        );
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -248,17 +259,21 @@ function drawScene() {
     gl.drawElements(gl.TRIANGLES, figures.thingCube.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     mvPopMatrix();
 
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.thingCylinder.center);
-    // mat4.scale(mvMatrix, figures.thingCylinder.scale);
-    // setBuffersToShaders(figures.thingCylinder.vertexPositionBuffer, figures.thingCylinder.vertexTextureCoordBuffer);
-    // gl.activeTexture(gl.TEXTURE0);
-    // gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
-    // gl.uniform1i(shaderProgram.samplerUniform, 0);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.thingCube.vertexIndexBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, figures.thingCylinder.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures.thingCylinder.center);
+    mat4.scale(mvMatrix, figures.thingCylinder.scale);
+    setBuffersToShaders(
+        figures.thingCylinder.vertexPositionBuffer,
+        figures.thingCylinder.vertexTextureCoordBuffer,
+        figures.thingCylinder.vertexNormalBuffer
+        );
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.thingCylinder.vertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, figures.thingCylinder.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    mvPopMatrix();
 
     //Draw Net
     gl.lineWidth(3);
@@ -269,69 +284,89 @@ function drawScene() {
     mvPushMatrix();
     mat4.translate(mvMatrix, figures.net.center);
     mat4.scale(mvMatrix, figures.net.scale);
-    setBuffersToShaders(figures.net.vertexPositionBuffer, figures.net.vertexColorBuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, figures.net.vertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, figures.net.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    setBuffersToShaders(figures.net.vertexPositionBuffer,
+        figures.net.vertexColorBuffer,
+        figures.net.vertexNormalBuffer
+        );
     setMatrixUniforms();
     gl.drawArrays(gl.LINES, 0, figures.net.vertexPositionBuffer.numItems);
     mvPopMatrix();
 
-    // //Draw blue NetCylinder
-    // gl.lineWidth(1);
-    // //Set NetCylinder color
-    // let netCylinderTexture = gl.createTexture();
-    // gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
-    // let netCylinderColor = new Uint8Array(figures.blueNetCylinderLines.color);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.blueNetCylinderLines.center);
-    // mat4.scale(mvMatrix, figures.blueNetCylinderLines.scale);
-    // setBuffersToShaders(figures.blueNetCylinderLines.vertexPositionBuffer, figures.blueNetCylinderLines.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINES, 0, figures.blueNetCylinderLines.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.blueNetCylinderCircles.center);
-    // mat4.scale(mvMatrix, figures.blueNetCylinderCircles.scale);
-    // setBuffersToShaders(figures.blueNetCylinderCircles.vertexPositionBuffer, figures.blueNetCylinderCircles.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINE_LOOP, 0, figures.blueNetCylinderCircles.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw green NetCylinder
-    // //Set netCylinder color
-    // netCylinderTexture = gl.createTexture();
-    // gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
-    // netCylinderColor = new Uint8Array(figures.greenNetCylinderLines.color);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
-    //
-    // gl.lineWidth(3);
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.greenNetCylinderLines.center);
-    // mat4.scale(mvMatrix, figures.greenNetCylinderLines.scale);
-    // setBuffersToShaders(figures.greenNetCylinderLines.vertexPositionBuffer, figures.greenNetCylinderLines.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINES, 0, figures.greenNetCylinderLines.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw NetCylinder
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.greenNetCylinderCircles.center);
-    // mat4.scale(mvMatrix, figures.greenNetCylinderCircles.scale);
-    // setBuffersToShaders(figures.greenNetCylinderCircles.vertexPositionBuffer, figures.greenNetCylinderCircles.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINE_LOOP, 0, figures.greenNetCylinderCircles.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
+    //Draw blue NetCylinder
+    gl.lineWidth(1);
+    //Set NetCylinder color
+    let netCylinderTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
+    let netCylinderColor = new Uint8Array(figures.blueNetCylinderLines.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures.blueNetCylinderLines.center);
+    mat4.scale(mvMatrix, figures.blueNetCylinderLines.scale);
+    setBuffersToShaders(
+        figures.blueNetCylinderLines.vertexPositionBuffer,
+        figures.blueNetCylinderLines.vertexColorBuffer,
+        figures.blueNetCylinderLines.vertexNormalBuffer
+    );
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINES, 0, figures.blueNetCylinderLines.vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures.blueNetCylinderCircles.center);
+    mat4.scale(mvMatrix, figures.blueNetCylinderCircles.scale);
+    setBuffersToShaders(
+        figures.blueNetCylinderCircles.vertexPositionBuffer,
+        figures.blueNetCylinderCircles.vertexColorBuffer,
+        figures.blueNetCylinderCircles.vertexNormalBuffer
+        );
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINE_LOOP, 0, figures.blueNetCylinderCircles.vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    //Draw green NetCylinder
+    //Set netCylinder color
+    netCylinderTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
+    netCylinderColor = new Uint8Array(figures.greenNetCylinderLines.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
+
+    gl.lineWidth(3);
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures.greenNetCylinderLines.center);
+    mat4.scale(mvMatrix, figures.greenNetCylinderLines.scale);
+    setBuffersToShaders(
+        figures.greenNetCylinderLines.vertexPositionBuffer,
+        figures.greenNetCylinderLines.vertexColorBuffer,
+        figures.greenNetCylinderLines.vertexNormalBuffer
+        );
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINES, 0, figures.greenNetCylinderLines.vertexPositionBuffer.numItems);
+    mvPopMatrix();
+
+    //Draw NetCylinder
+    mvPushMatrix();
+    mat4.translate(mvMatrix, figures.greenNetCylinderCircles.center);
+    mat4.scale(mvMatrix, figures.greenNetCylinderCircles.scale);
+    setBuffersToShaders(
+        figures.greenNetCylinderCircles.vertexPositionBuffer,
+        figures.greenNetCylinderCircles.vertexColorBuffer,
+        figures.greenNetCylinderCircles.vertexNormalBuffer
+    );
+    setMatrixUniforms();
+    gl.drawArrays(gl.LINE_LOOP, 0, figures.greenNetCylinderCircles.vertexPositionBuffer.numItems);
+    mvPopMatrix();
 
 }
 
-function setBuffersToShaders(posBuffer, textureCoordsBuffer) {
+function setBuffersToShaders(posBuffer, textureCoordsBuffer, normalBuffer) {
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, posBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER,  textureCoordsBuffer);
     gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, textureCoordsBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 }
 
 function handleKeyDown(event) {
