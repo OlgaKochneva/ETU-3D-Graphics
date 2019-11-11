@@ -26,8 +26,8 @@ function webGLStart() {
     };
 
     initBuffers();
-    strangeTexture  = initTexture('strange.jpg');
-    sceneTexture  = initTexture('scene.jpg');
+    strangeTexture  = initTexture('sources/textures/strange.jpg');
+    sceneTexture  = initTexture('sources/textures/scene.jpg');
     gl.clearColor(0.5, 0.5, 0.6, 1.0);
     gl.enable(gl.DEPTH_TEST);
     document.onkeyup = handleKeyUp;
@@ -248,18 +248,6 @@ function drawScene() {
     gl.drawElements(gl.TRIANGLES, figures.thingCube.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     mvPopMatrix();
 
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.thingCylinder.center);
-    // mat4.scale(mvMatrix, figures.thingCylinder.scale);
-    // setBuffersToShaders(figures.thingCylinder.vertexPositionBuffer, figures.thingCylinder.vertexTextureCoordBuffer);
-    // gl.activeTexture(gl.TEXTURE0);
-    // gl.bindTexture(gl.TEXTURE_2D, strangeTexture);
-    // gl.uniform1i(shaderProgram.samplerUniform, 0);
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, figures.thingCube.vertexIndexBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, figures.thingCylinder.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-
     //Draw Net
     gl.lineWidth(3);
     let netTexture = gl.createTexture();
@@ -275,55 +263,6 @@ function drawScene() {
     setMatrixUniforms();
     gl.drawArrays(gl.LINES, 0, figures.net.vertexPositionBuffer.numItems);
     mvPopMatrix();
-
-    // //Draw blue NetCylinder
-    // gl.lineWidth(1);
-    // //Set NetCylinder color
-    // let netCylinderTexture = gl.createTexture();
-    // gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
-    // let netCylinderColor = new Uint8Array(figures.blueNetCylinderLines.color);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.blueNetCylinderLines.center);
-    // mat4.scale(mvMatrix, figures.blueNetCylinderLines.scale);
-    // setBuffersToShaders(figures.blueNetCylinderLines.vertexPositionBuffer, figures.blueNetCylinderLines.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINES, 0, figures.blueNetCylinderLines.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.blueNetCylinderCircles.center);
-    // mat4.scale(mvMatrix, figures.blueNetCylinderCircles.scale);
-    // setBuffersToShaders(figures.blueNetCylinderCircles.vertexPositionBuffer, figures.blueNetCylinderCircles.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINE_LOOP, 0, figures.blueNetCylinderCircles.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw green NetCylinder
-    // //Set netCylinder color
-    // netCylinderTexture = gl.createTexture();
-    // gl.bindTexture(gl.TEXTURE_2D, netCylinderTexture);
-    // netCylinderColor = new Uint8Array(figures.greenNetCylinderLines.color);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, netCylinderColor);
-    //
-    // gl.lineWidth(3);
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.greenNetCylinderLines.center);
-    // mat4.scale(mvMatrix, figures.greenNetCylinderLines.scale);
-    // setBuffersToShaders(figures.greenNetCylinderLines.vertexPositionBuffer, figures.greenNetCylinderLines.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINES, 0, figures.greenNetCylinderLines.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-    //
-    // //Draw NetCylinder
-    // mvPushMatrix();
-    // mat4.translate(mvMatrix, figures.greenNetCylinderCircles.center);
-    // mat4.scale(mvMatrix, figures.greenNetCylinderCircles.scale);
-    // setBuffersToShaders(figures.greenNetCylinderCircles.vertexPositionBuffer, figures.greenNetCylinderCircles.vertexColorBuffer);
-    // setMatrixUniforms();
-    // gl.drawArrays(gl.LINE_LOOP, 0, figures.greenNetCylinderCircles.vertexPositionBuffer.numItems);
-    // mvPopMatrix();
-
 }
 
 function setBuffersToShaders(posBuffer, textureCoordsBuffer) {
