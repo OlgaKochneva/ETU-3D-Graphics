@@ -35,78 +35,15 @@ function main() {
         gl,
         2,  // size
     );
-    const cubeLinesBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
-        position: [
-            -1, -1, -1,
-            1, -1, -1,
-            -1,  1, -1,
-            1,  1, -1,
-            -1, -1,  1,
-            1, -1,  1,
-            -1,  1,  1,
-            1,  1,  1,
-        ],
-        indices: [
-            0, 1,
-            1, 3,
-            3, 2,
-            2, 0,
 
-            4, 5,
-            5, 7,
-            7, 6,
-            6, 4,
-
-            0, 4,
-            1, 5,
-            3, 7,
-            2, 6,
-        ],
-    });
-
-    // make a 8x8 checkerboard texture
-    const checkerboardTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, checkerboardTexture);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,                // mip level
-        gl.LUMINANCE,     // internal format
-        8,                // width
-        8,                // height
-        0,                // border
-        gl.LUMINANCE,     // format
-        gl.UNSIGNED_BYTE, // type
-        new Uint8Array([  // data
-            0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
-            0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
-            0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
-            0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
-            0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
-            0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
-            0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
-            0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
-        ]));
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-    const depthTexture = gl.createTexture();
+    // ------------------------------TEXTURES--------------------------------------
+    //Init my textures
+    const strangeTexture  = initTexture('sources/textures/strange.jpg');
+    // Init a 8x8 checkerboard texture
+    const checkerboardTexture = createChessBoardTexture();
+    // Init depth texture
     const depthTextureSize = 512;
-    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
-    gl.texImage2D(
-        gl.TEXTURE_2D,      // target
-        0,                  // mip level
-        gl.DEPTH_COMPONENT, // internal format
-        depthTextureSize,   // width
-        depthTextureSize,   // height
-        0,                  // border
-        gl.DEPTH_COMPONENT, // format
-        gl.UNSIGNED_INT,    // type
-        null);              // data
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
+    const depthTexture = createDepthTexture();
     const depthFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
     gl.framebufferTexture2D(
@@ -115,11 +52,7 @@ function main() {
         gl.TEXTURE_2D,        // texture target
         depthTexture,         // texture
         0);                   // mip level
-
-    function degToRad(d) {
-        return d * Math.PI / 180;
-    }
-
+    // ------------------------------TEXTURES--------------------------------------
     const settings = {
         cameraX: 6,
         cameraY: 12,
@@ -303,35 +236,92 @@ function main() {
             textureMatrix,
             lightWorldMatrix,
             textureProgramInfo);
-
-        // ------ Draw the frustum ------
-        {
-            const viewMatrix = m4.inverse(cameraMatrix);
-
-            gl.useProgram(colorProgramInfo.program);
-
-            // Setup all the needed attributes.
-            webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, cubeLinesBufferInfo);
-
-            // scale the cube in Z so it's really long
-            // to represent the texture is being projected to
-            // infinity
-            const mat = m4.multiply(
-                lightWorldMatrix, m4.inverse(lightProjectionMatrix));
-
-            // Set the uniforms we just computed
-            webglUtils.setUniforms(colorProgramInfo, {
-                u_color: [1, 1, 1, 1],
-                u_view: viewMatrix,
-                u_projection: projectionMatrix,
-                u_world: mat,
-            });
-
-            // calls gl.drawArrays or gl.drawElements
-            webglUtils.drawBufferInfo(gl, cubeLinesBufferInfo, gl.LINES);
-        }
     }
+
+    function initTexture(url) {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        const level = 0;
+        const internalFormat = gl.RGBA;
+        const width = 1;
+        const height = 1;
+        const border = 0;
+        const srcFormat = gl.RGBA;
+        const srcType = gl.UNSIGNED_BYTE;
+        const pixel = new Uint8Array([255, 255, 255, 255]);
+        gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+            width, height, border, srcFormat, srcType,
+            pixel);
+
+        const image = new Image();
+        image.onload = function() {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                srcFormat, srcType, image);
+            if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+                gl.generateMipmap(gl.TEXTURE_2D);
+            } else {
+                // Размер не соответствует степени 2.
+                // Отключаем MIP'ы и устанавливаем натяжение по краям
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            }
+        };
+        image.src = url;
+        return texture;
+    }
+    
+    function createChessBoardTexture() {
+        let texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,                // mip level
+            gl.LUMINANCE,     // internal format
+            8,                // width
+            8,                // height
+            0,                // border
+            gl.LUMINANCE,     // format
+            gl.UNSIGNED_BYTE, // type
+            new Uint8Array([  // data
+                0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
+                0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
+                0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
+                0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
+                0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
+                0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
+                0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC,
+                0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF, 0xCC, 0xFF,
+            ]));
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        return texture;
+    }
+
+    function createDepthTexture() {
+        let texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,      // target
+            0,                  // mip level
+            gl.DEPTH_COMPONENT, // internal format
+            depthTextureSize,   // width
+            depthTextureSize,   // height
+            0,                  // border
+            gl.DEPTH_COMPONENT, // format
+            gl.UNSIGNED_INT,    // type
+            null);              // data
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        return texture;
+    }
+
     render();
 }
+
 
 main();
