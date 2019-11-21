@@ -36,6 +36,30 @@ function main() {
         2,  // size
     );
 
+    const cylinderBufferInfo = primitives.createTruncatedConeBufferInfo(
+        gl,
+        1,
+        1,
+        1,
+        100,
+        2
+    );
+
+    const netBufferInfo = initBufferInfo(new Net( 15));
+    const blueNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 20));
+    const blueNetCylinderCirclesBufferInfo = initBufferInfo(new NetCylinder(6, 0));
+    const greenNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 15));
+    const greenNetCylinderCirclesBufferInfo = initBufferInfo(new NetCylinder(4, 0));
+
+    function initBufferInfo(figure) {
+        figure.generateBufferInfo();
+        return webglUtils.createBufferInfoFromArrays(gl, {
+                position: figure.vertices,
+                indices: figure.indices,
+                normals: figure.normals,
+                texCoords: figure.textureCoords
+        });
+    }
     // ------------------------------TEXTURES--------------------------------------
     //Init my textures
     const strangeTexture  = initTexture('sources/textures/strange.jpg');
@@ -88,22 +112,43 @@ function main() {
 
     // Uniforms for each object.
     const planeUniforms = {
-        u_colorMult: [0.5, 0.5, 1, 1],  // lightblue
+        u_colorMult: [1, 1, 1, 1],  // lightblue
         u_color: [1, 0, 0, 1],
         u_texture: checkerboardTexture,
         u_world: m4.translation(0, 0, 0),
     };
     const sphereUniforms = {
-        u_colorMult: [1, 0.5, 0.5, 1],  // pink
+        u_colorMult: [1, 1, 1, 1],  // pink
         u_color: [0, 0, 1, 1],
         u_texture: checkerboardTexture,
         u_world: m4.translation(2, 3, 4),
     };
     const cubeUniforms = {
-        u_colorMult: [0.5, 1, 0.5, 1],  // lightgreen
+        u_colorMult: [1, 1, 1, 1],  // lightgreen
         u_color: [0, 0, 1, 1],
         u_texture: checkerboardTexture,
-        u_world: m4.translation(3, 1, 0),
+        u_world: m4.scale(m4.translation(-3, 1, 5), 2, 0.5, 2),
+    };
+
+    const netUniforms = {
+        u_colorMult: [66/255, 1/255, 22/255, 255/255],  // lightgreen
+        u_color: [0, 0, 1, 1],
+        u_texture: checkerboardTexture,
+        u_world: m4.scale(m4.translation(5, 2.5, 5.5), 5, 5, 1),
+    };
+
+    const blueNetCylinderUniforms = {
+        u_colorMult: [1, 0, 0, 1],  // lightgreen
+        u_color: [0, 0, 1, 1],
+        u_texture: checkerboardTexture,
+        u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
+    };
+
+    const greenNetCylinderUniforms = {
+        u_colorMult: [1, 0, 0, 1],  // lightgreen
+        u_color: [0, 0, 1, 1],
+        u_texture: checkerboardTexture,
+        u_world: m4.scale(m4.translation(-3, 1,-2), 2, 3, 2),
     };
 
     function drawScene(
@@ -129,28 +174,6 @@ function main() {
             u_reverseLightDirection: lightWorldMatrix.slice(8, 11),
         });
 
-        // ------ Draw the sphere --------
-
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, sphereBufferInfo);
-
-        // Set the uniforms unique to the sphere
-        webglUtils.setUniforms(programInfo, sphereUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, sphereBufferInfo);
-
-        // ------ Draw the cube --------
-
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, cubeBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, cubeUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, cubeBufferInfo);
-
         // ------ Draw the plane --------
 
         // Setup all the needed attributes.
@@ -161,6 +184,90 @@ function main() {
 
         // calls gl.drawArrays or gl.drawElements
         webglUtils.drawBufferInfo(gl, planeBufferInfo);
+
+        // ------ Draw the cube --------
+
+        // Setup all the needed attributes.
+        webglUtils.setBuffersAndAttributes(gl, programInfo, cubeBufferInfo);
+
+        cubeUniforms.u_world = m4.scale(m4.translation(-3, 0.5, 5), 2, 0.5, 2);
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, cubeUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+
+        // ------ Draw the strange thing-cube-cylinder ---
+
+        // Setup all the needed attributes.
+        webglUtils.setBuffersAndAttributes(gl, programInfo, cubeBufferInfo);
+
+        cubeUniforms.u_world = m4.scale(m4.translation(3, 3.5, -1), 2, 1, 2);
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, cubeUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+
+        // Setup all the needed attributes.
+        webglUtils.setBuffersAndAttributes(gl, programInfo, cylinderBufferInfo);
+
+        cubeUniforms.u_world = m4.scale(m4.translation(3, 1, -1), 1.5, 3, 1.5);
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, cubeUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl, cylinderBufferInfo);
+
+        // ------ Draw net --------------
+
+        // Setup all the needed attributes.
+        webglUtils.setBuffersAndAttributes(gl, programInfo, netBufferInfo);
+
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, netUniforms);
+
+        gl.lineWidth(3);
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl, netBufferInfo, gl.LINES);
+
+        // ---------- Blue NetCylinder -----------
+        gl.lineWidth(1);
+        // Setup all the needed attributes.
+        webglUtils.setBuffersAndAttributes(gl, programInfo, blueNetCylinderCirclesBufferInfo);
+
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, blueNetCylinderUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl,  blueNetCylinderCirclesBufferInfo, gl.LINE_LOOP);
+
+        webglUtils.setBuffersAndAttributes(gl, programInfo, blueNetCylinderLinesBufferInfo);
+
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, blueNetCylinderUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl,  blueNetCylinderLinesBufferInfo, gl.LINES);
+
+        gl.lineWidth(3);
+        // ---------- Green NetCylinder -----------
+        webglUtils.setBuffersAndAttributes(gl, programInfo, greenNetCylinderCirclesBufferInfo);
+
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, greenNetCylinderUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl,  greenNetCylinderCirclesBufferInfo, gl.LINE_LOOP);
+
+        webglUtils.setBuffersAndAttributes(gl, programInfo, greenNetCylinderLinesBufferInfo);
+
+        // Set the uniforms unique to the cube
+        webglUtils.setUniforms(programInfo, greenNetCylinderUniforms);
+
+        // calls gl.drawArrays or gl.drawElements
+        webglUtils.drawBufferInfo(gl,  greenNetCylinderLinesBufferInfo, gl.LINES);
+
     }
 
     // Draw the scene.
@@ -180,15 +287,15 @@ function main() {
             ? m4.perspective(
                 degToRad(settings.fieldOfView),
                 settings.projWidth / settings.projHeight,
-                0.5,  // near
-                10)   // far
+                0.01,  // near
+                20)   // far
             : m4.orthographic(
                 -settings.projWidth / 2,   // left
                 settings.projWidth / 2,   // right
                 -settings.projHeight / 2,  // bottom
                 settings.projHeight / 2,  // top
-                0.5,                      // near
-                10);                      // far
+                0.01,                      // near
+                20);                      // far
 
         // draw to the depth texture
         gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
