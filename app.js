@@ -39,7 +39,8 @@ function main() {
         2
     );
 
-    const netBufferInfo = initBufferInfo(new Net( 15));
+    // Init buffers for not standard figures
+    const netBufferInfo = initBufferInfo(new Net(11));//поправить для четных/нечетных
     const blueNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 40));
     const blueNetCylinderCirclesBufferInfo = initBufferInfo(new NetCylinder(6, 0));
     const greenNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 15));
@@ -48,15 +49,16 @@ function main() {
     function initBufferInfo(figure) {
         figure.generateBufferInfo();
         return webglUtils.createBufferInfoFromArrays(gl, {
-                position: figure.vertices,
-                indices: figure.indices,
-                normals: figure.normals,
-                texCoords: figure.textureCoords
+            position: figure.vertices,
+            indices: figure.indices,
+            normals: figure.normals,
+            texCoords: figure.textureCoords
         });
     }
+
     // ------------------------------TEXTURES--------------------------------------
     //Init my textures
-    const strangeTexture  = initTexture('sources/textures/strange1.png');
+    const strangeTexture = initTexture('sources/textures/strangeTexture.png');
     // Init a 8x8 checkerboard texture
     const checkerboardTexture = createChessBoardTexture();
     // Init depth texture
@@ -70,7 +72,8 @@ function main() {
         gl.TEXTURE_2D,        // texture target
         depthTexture,         // texture
         0);                   // mip level
-    // ------------------------------TEXTURES--------------------------------------
+
+    // ------------------------------UI--------------------------------------
     const settings = {
         cameraX: -9.5,
         cameraY: 12,
@@ -82,63 +85,25 @@ function main() {
         targetZ: 0.6,
         projWidth: 20,
         projHeight: 15,
-        perspective: false,
         fieldOfView: 120,
         bias: -0.006,
     };
     webglLessonsUI.setupUI(document.querySelector('#ui'), settings, [
-        { type: 'slider',   key: 'cameraX',    min: -20, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'cameraY',    min:   1, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'posX',       min: -10, max: 10, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'posY',       min:   1, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'posZ',       min:   1, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'targetX',    min: -10, max: 10, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'targetY',    min:   0, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'targetZ',    min: -10, max: 20, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'projWidth',  min:   0, max: 100, change: render, precision: 2, step: 0.001, },
-        { type: 'slider',   key: 'projHeight', min:   0, max: 100, change: render, precision: 2, step: 0.001, },
-        { type: 'checkbox', key: 'perspective', change: render, },
-        { type: 'slider',   key: 'fieldOfView', min:  1, max: 179, change: render, },
-        { type: 'slider',   key: 'bias',       min:  -0.01, max: 0.00001, change: render, precision: 4, step: 0.0001, },
+        {type: 'slider', key: 'cameraX', min: -20, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'cameraY', min: 1, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'posX', min: -10, max: 10, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'posY', min: 1, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'posZ', min: 1, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'targetX', min: -10, max: 10, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'targetY', min: 0, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'targetZ', min: -10, max: 20, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'projWidth', min: 0, max: 100, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'projHeight', min: 0, max: 100, change: render, precision: 2, step: 0.001,},
+        {type: 'slider', key: 'fieldOfView', min: 1, max: 179, change: render,},
+        {type: 'slider', key: 'bias', min: -0.01, max: 0.00001, change: render, precision: 4, step: 0.0001,},
     ]);
 
     const fieldOfViewRadians = degToRad(60);
-
-    // Uniforms for each object.
-    const planeUniforms = {
-        u_colorMult: [1, 1, 1, 1],  // lightblue
-        u_color: [1, 0, 0, 1],
-        u_texture: checkerboardTexture,
-        u_world: m4.translation(0, 0, 0),
-    };
-
-    const cubeUniforms = {
-        u_colorMult: [1, 1, 1, 1],  // lightgreen
-        u_color: [1, 0, 0, 1],
-        u_texture: strangeTexture,
-        u_world: m4.scale(m4.translation(-3, 1, 5), 2, 0.5, 2),
-    };
-
-    const netUniforms = {
-        //u_colorMult: [66/255, 1/255, 22/255, 255/255],  // lightgreen
-        u_color: [66/255, 1/255, 22/255, 255/255],
-        //u_texture: checkerboardTexture,
-        u_world: m4.scale(m4.translation(5, 2.5, 5.5), 5, 5, 1),
-    };
-
-    const blueNetCylinderUniforms = {
-        //u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [0, 127/255, 1, 1],
-        //u_texture: checkerboardTexture,
-        u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
-    };
-
-    const greenNetCylinderUniforms = {
-        //u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [59/255, 201/255, 2/255, 1],
-        //u_texture: checkerboardTexture,
-        u_world: m4.scale(m4.translation(-3, 1,-2), 2, 3, 2),
-    };
 
     function draw3DObjects(
         projectionMatrix,
@@ -164,49 +129,50 @@ function main() {
         });
 
         // ------ Draw the plane --------
-
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, planeBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, planeUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, planeBufferInfo);
+        drawFigure(programInfo, planeBufferInfo,
+            {
+                u_colorMult: [1, 1, 1, 1],
+                u_color: [1, 0, 0, 1],
+                u_texture: checkerboardTexture,
+                u_world: m4.translation(0, 0, 0),
+            });
 
         // ------ Draw the cube --------
-
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, cubeBufferInfo);
-
-        cubeUniforms.u_world = m4.scale(m4.translation(-3, 0.5, 5), 2, 0.5, 2);
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, cubeUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+        drawFigure(programInfo, cubeBufferInfo, {
+            u_colorMult: [1, 1, 1, 1],
+            u_color: [1, 0, 0, 1],
+            u_texture: strangeTexture,
+            u_world: m4.scale(m4.translation(-3, 1, 5), 2, 0.5, 2),
+        });
 
         // ------ Draw the strange thing-cube-cylinder ---
+        drawFigure(programInfo, cubeBufferInfo, {
+            u_colorMult: [1, 1, 1, 1],
+            u_color: [1, 0, 0, 1],
+            u_texture: strangeTexture,
+            u_world: m4.scale(m4.translation(3, 4.5, -1), 2, 1.2, 2),
+        });
+        drawFigure(programInfo, cylinderBufferInfo, {
+            u_colorMult: [1, 1, 1, 1],
+            u_color: [1, 0, 0, 1],
+            u_texture: strangeTexture,
+            u_world: m4.scale(m4.translation(3, 2, -1), 1.8, 3.5, 1.8)
+        });
+    }
 
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, cubeBufferInfo);
+    function drawFigure(program, figureBuffer, figureUniform, primitive) {
+        webglUtils.setBuffersAndAttributes(gl, program, figureBuffer);
 
-        cubeUniforms.u_world = m4.scale(m4.translation(3, 3.5, -1), 2, 1, 2);
         // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, cubeUniforms);
+        webglUtils.setUniforms(program, figureUniform);
 
         // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+        if (primitive) {
+            webglUtils.drawBufferInfo(gl, figureBuffer, primitive);
+        } else {
+            webglUtils.drawBufferInfo(gl, figureBuffer);
+        }
 
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, cylinderBufferInfo);
-
-        cubeUniforms.u_world = m4.scale(m4.translation(3, 1, -1), 1.5, 3, 1.5);
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, cubeUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, cylinderBufferInfo);
     }
 
     function drawNets(
@@ -220,9 +186,7 @@ function main() {
 
         gl.useProgram(programInfo.program);
 
-        // set uniforms that are the same for both the sphere and plane
-        // note: any values with no corresponding uniform in the shader
-        // are ignored.
+        // set uniforms
         webglUtils.setUniforms(programInfo, {
             u_view: viewMatrix,
             u_projection: projectionMatrix,
@@ -233,53 +197,33 @@ function main() {
         });
 
         // ------ Draw net --------------
-
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, netBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, netUniforms);
-
         gl.lineWidth(3);
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl, netBufferInfo, gl.LINES);
+        drawFigure(programInfo, netBufferInfo, {
+            u_color: [66 / 255, 1 / 255, 22 / 255, 255 / 255],
+            u_world: m4.scale(m4.translation(5, 2.5, 5.5), 5, 5, 1),
+        }, gl.LINES);
+
+        // ---------- Green NetCylinder -----------
+        drawFigure(programInfo, greenNetCylinderCirclesBufferInfo, {
+            u_color: [59 / 255, 201 / 255, 2 / 255, 1],
+            u_world: m4.scale(m4.translation(-3, 1, -2), 2, 3, 2),
+        }, gl.LINE_STRIP);
+        drawFigure(programInfo, greenNetCylinderLinesBufferInfo, {
+            u_color: [59 / 255, 201 / 255, 2 / 255, 1],
+            u_world: m4.scale(m4.translation(-3, 1, -2), 2, 3, 2),
+        }, gl.LINES);
 
         // ---------- Blue NetCylinder -----------
         gl.lineWidth(1);
-        // Setup all the needed attributes.
-        webglUtils.setBuffersAndAttributes(gl, programInfo, blueNetCylinderCirclesBufferInfo);
+        drawFigure(programInfo, blueNetCylinderCirclesBufferInfo, {
+            u_color: [0.0, 0.5, 1.0, 1.0],
+            u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
+        }, gl.LINE_STRIP);
 
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, blueNetCylinderUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  blueNetCylinderCirclesBufferInfo, gl.LINE_STRIP);
-
-        webglUtils.setBuffersAndAttributes(gl, programInfo, blueNetCylinderLinesBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, blueNetCylinderUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  blueNetCylinderLinesBufferInfo, gl.LINES);
-
-        gl.lineWidth(3);
-        // ---------- Green NetCylinder -----------
-        webglUtils.setBuffersAndAttributes(gl, programInfo, greenNetCylinderCirclesBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, greenNetCylinderUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  greenNetCylinderCirclesBufferInfo, gl.LINE_STRIP);
-
-        webglUtils.setBuffersAndAttributes(gl, programInfo, greenNetCylinderLinesBufferInfo);
-
-        // Set the uniforms unique to the cube
-        webglUtils.setUniforms(programInfo, greenNetCylinderUniforms);
-
-        // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  greenNetCylinderLinesBufferInfo, gl.LINES);
+        drawFigure(programInfo, blueNetCylinderLinesBufferInfo, {
+            u_color: [0.0, 0.5, 1.0, 1.0],
+            u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
+        }, gl.LINES);
 
     }
 
@@ -296,26 +240,20 @@ function main() {
             [settings.targetX, settings.targetY, settings.targetZ], // target
             [0, 1, 0],                                              // up
         );
-        const lightProjectionMatrix = settings.perspective
-            ? m4.perspective(
-                degToRad(settings.fieldOfView),
-                settings.projWidth / settings.projHeight,
-                0.01,  // near
-                20)   // far
-            : m4.orthographic(
-                -settings.projWidth / 2,   // left
-                settings.projWidth / 2,   // right
-                -settings.projHeight / 2,  // bottom
-                settings.projHeight / 2,  // top
-                0.01,                      // near
-                20);                      // far
+        const lightProjectionMatrix = m4.orthographic(
+            -settings.projWidth / 2,   // left
+            settings.projWidth / 2,   // right
+            -settings.projHeight / 2,  // bottom
+            settings.projHeight / 2,  // top
+            0.01,                      // near
+            20);                      // far
 
         // draw to the depth texture
         gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
         gl.viewport(0, 0, depthTextureSize, depthTextureSize);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        // Draw shadows
+        // Depth rendering
         draw3DObjects(
             lightProjectionMatrix,
             lightWorldMatrix,
@@ -357,7 +295,7 @@ function main() {
         const up = [0, 1, 0];
         const cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
-        // Draw textured/colored figures
+        // Scene visualisation
         draw3DObjects(
             projectionMatrix,
             cameraMatrix,
@@ -388,7 +326,7 @@ function main() {
             pixel);
 
         const image = new Image();
-        image.onload = function() {
+        image.onload = function () {
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
                 srcFormat, srcType, image);
@@ -405,7 +343,7 @@ function main() {
         image.src = url;
         return texture;
     }
-    
+
     function createChessBoardTexture() {
         let texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -456,6 +394,5 @@ function main() {
 
     render();
 }
-
 
 main();
