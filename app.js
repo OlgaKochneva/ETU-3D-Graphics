@@ -20,8 +20,8 @@ function main() {
 
     const planeBufferInfo = primitives.createPlaneBufferInfo(
         gl,
-        20,  // width
-        20,  // height
+        25,  // width
+        25,  // height
         1,   // subdivisions across
         1,   // subdivisions down
     );
@@ -40,7 +40,7 @@ function main() {
     );
 
     const netBufferInfo = initBufferInfo(new Net( 15));
-    const blueNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 20));
+    const blueNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 40));
     const blueNetCylinderCirclesBufferInfo = initBufferInfo(new NetCylinder(6, 0));
     const greenNetCylinderLinesBufferInfo = initBufferInfo(new NetCylinder(0, 15));
     const greenNetCylinderCirclesBufferInfo = initBufferInfo(new NetCylinder(4, 0));
@@ -74,12 +74,12 @@ function main() {
     const settings = {
         cameraX: -9.5,
         cameraY: 12,
-        posX: 2.5,
+        posX: 1.0,
         posY: 4.8,
         posZ: 7,
         targetX: 3.5,
         targetY: 0,
-        targetZ: 3.5,
+        targetZ: 0.6,
         projWidth: 20,
         projHeight: 15,
         perspective: false,
@@ -120,27 +120,27 @@ function main() {
     };
 
     const netUniforms = {
-        u_colorMult: [66/255, 1/255, 22/255, 255/255],  // lightgreen
-        u_color: [1, 0, 0, 1],
-        u_texture: checkerboardTexture,
+        //u_colorMult: [66/255, 1/255, 22/255, 255/255],  // lightgreen
+        u_color: [66/255, 1/255, 22/255, 255/255],
+        //u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(5, 2.5, 5.5), 5, 5, 1),
     };
 
     const blueNetCylinderUniforms = {
-        u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [1, 0, 0, 1],
-        u_texture: checkerboardTexture,
+        //u_colorMult: [1, 0, 0, 1],  // lightgreen
+        u_color: [0, 127/255, 1, 1],
+        //u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
     };
 
     const greenNetCylinderUniforms = {
-        u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [1, 0, 0, 1],
-        u_texture: checkerboardTexture,
+        //u_colorMult: [1, 0, 0, 1],  // lightgreen
+        u_color: [59/255, 201/255, 2/255, 1],
+        //u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(-3, 1,-2), 2, 3, 2),
     };
 
-    function drawScene(
+    function draw3DObjects(
         projectionMatrix,
         cameraMatrix,
         textureMatrix,
@@ -207,6 +207,30 @@ function main() {
 
         // calls gl.drawArrays or gl.drawElements
         webglUtils.drawBufferInfo(gl, cylinderBufferInfo);
+    }
+
+    function drawNets(
+        projectionMatrix,
+        cameraMatrix,
+        textureMatrix,
+        lightWorldMatrix,
+        programInfo) {
+        // Make a view matrix from the camera matrix.
+        const viewMatrix = m4.inverse(cameraMatrix);
+
+        gl.useProgram(programInfo.program);
+
+        // set uniforms that are the same for both the sphere and plane
+        // note: any values with no corresponding uniform in the shader
+        // are ignored.
+        webglUtils.setUniforms(programInfo, {
+            u_view: viewMatrix,
+            u_projection: projectionMatrix,
+            u_bias: settings.bias,
+            u_textureMatrix: textureMatrix,
+            u_projectedTexture: depthTexture,
+            u_reverseLightDirection: lightWorldMatrix.slice(8, 11),
+        });
 
         // ------ Draw net --------------
 
@@ -291,8 +315,15 @@ function main() {
         gl.viewport(0, 0, depthTextureSize, depthTextureSize);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        drawScene(
+        // Draw shadows
+        draw3DObjects(
             lightProjectionMatrix,
+            lightWorldMatrix,
+            m4.identity(),
+            lightWorldMatrix,
+            colorProgramInfo);
+
+        drawNets(lightProjectionMatrix,
             lightWorldMatrix,
             m4.identity(),
             lightWorldMatrix,
@@ -326,12 +357,19 @@ function main() {
         const up = [0, 1, 0];
         const cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
-        drawScene(
+        // Draw textured/colored figures
+        draw3DObjects(
             projectionMatrix,
             cameraMatrix,
             textureMatrix,
             lightWorldMatrix,
             textureProgramInfo);
+        drawNets(
+            projectionMatrix,
+            cameraMatrix,
+            textureMatrix,
+            lightWorldMatrix,
+            colorProgramInfo);
     }
 
     function initTexture(url) {
