@@ -87,21 +87,22 @@ class NetCylinder{
                 this.vertices.push(x1, this.height, z1, x1, -this.height, z1);
                 this.indices.push(indices++);
                 this.indices.push(indices++);
-                this.normals.push(0.0, 0.0, 1.0, 0.0, 0.0, 1.0);
+                this.normals.push(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
             }
         }
         else {
             let heightOffset = this.height / this.vertical_freq;
             for (let height = -this.height; height < this.height; height += heightOffset){
+                let last_indice = indices;
                 for(let theta = 0; theta < 2 * Math.PI; theta += thetaOffset) {
                     let x1  = this.radius * Math.cos(theta);
                     let z1 =  this.radius * Math.sin(theta);
                     //top point
                     this.vertices.push(x1, height, z1);
                     this.indices.push(indices++);
-                    this.normals.push(0.0, 0.0, 1.0);
-
+                    this.normals.push(0.0, 0.0, 0.0);
                 }
+                this.indices.push(last_indice)
             }
         }
     }

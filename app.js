@@ -18,12 +18,6 @@ function main() {
     const textureProgramInfo = webglUtils.createProgramInfo(gl, ['3d-vertex-shader', '3d-fragment-shader']);
     const colorProgramInfo = webglUtils.createProgramInfo(gl, ['color-vertex-shader', 'color-fragment-shader']);
 
-    const sphereBufferInfo = primitives.createSphereBufferInfo(
-        gl,
-        1,  // radius
-        32, // subdivisions around
-        24, // subdivisions down
-    );
     const planeBufferInfo = primitives.createPlaneBufferInfo(
         gl,
         20,  // width
@@ -62,7 +56,7 @@ function main() {
     }
     // ------------------------------TEXTURES--------------------------------------
     //Init my textures
-    const strangeTexture  = initTexture('sources/textures/strange.jpg');
+    const strangeTexture  = initTexture('sources/textures/strange1.png');
     // Init a 8x8 checkerboard texture
     const checkerboardTexture = createChessBoardTexture();
     // Init depth texture
@@ -78,7 +72,7 @@ function main() {
         0);                   // mip level
     // ------------------------------TEXTURES--------------------------------------
     const settings = {
-        cameraX: 6,
+        cameraX: -9.5,
         cameraY: 12,
         posX: 2.5,
         posY: 4.8,
@@ -86,14 +80,14 @@ function main() {
         targetX: 3.5,
         targetY: 0,
         targetZ: 3.5,
-        projWidth: 10,
-        projHeight: 10,
+        projWidth: 20,
+        projHeight: 15,
         perspective: false,
         fieldOfView: 120,
         bias: -0.006,
     };
     webglLessonsUI.setupUI(document.querySelector('#ui'), settings, [
-        { type: 'slider',   key: 'cameraX',    min: -10, max: 10, change: render, precision: 2, step: 0.001, },
+        { type: 'slider',   key: 'cameraX',    min: -20, max: 20, change: render, precision: 2, step: 0.001, },
         { type: 'slider',   key: 'cameraY',    min:   1, max: 20, change: render, precision: 2, step: 0.001, },
         { type: 'slider',   key: 'posX',       min: -10, max: 10, change: render, precision: 2, step: 0.001, },
         { type: 'slider',   key: 'posY',       min:   1, max: 20, change: render, precision: 2, step: 0.001, },
@@ -117,36 +111,31 @@ function main() {
         u_texture: checkerboardTexture,
         u_world: m4.translation(0, 0, 0),
     };
-    const sphereUniforms = {
-        u_colorMult: [1, 1, 1, 1],  // pink
-        u_color: [0, 0, 1, 1],
-        u_texture: checkerboardTexture,
-        u_world: m4.translation(2, 3, 4),
-    };
+
     const cubeUniforms = {
         u_colorMult: [1, 1, 1, 1],  // lightgreen
-        u_color: [0, 0, 1, 1],
-        u_texture: checkerboardTexture,
+        u_color: [1, 0, 0, 1],
+        u_texture: strangeTexture,
         u_world: m4.scale(m4.translation(-3, 1, 5), 2, 0.5, 2),
     };
 
     const netUniforms = {
         u_colorMult: [66/255, 1/255, 22/255, 255/255],  // lightgreen
-        u_color: [0, 0, 1, 1],
+        u_color: [1, 0, 0, 1],
         u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(5, 2.5, 5.5), 5, 5, 1),
     };
 
     const blueNetCylinderUniforms = {
         u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [0, 0, 1, 1],
+        u_color: [1, 0, 0, 1],
         u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(-3, 4, -2), 2, 3, 2),
     };
 
     const greenNetCylinderUniforms = {
         u_colorMult: [1, 0, 0, 1],  // lightgreen
-        u_color: [0, 0, 1, 1],
+        u_color: [1, 0, 0, 1],
         u_texture: checkerboardTexture,
         u_world: m4.scale(m4.translation(-3, 1,-2), 2, 3, 2),
     };
@@ -240,7 +229,7 @@ function main() {
         webglUtils.setUniforms(programInfo, blueNetCylinderUniforms);
 
         // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  blueNetCylinderCirclesBufferInfo, gl.LINE_LOOP);
+        webglUtils.drawBufferInfo(gl,  blueNetCylinderCirclesBufferInfo, gl.LINE_STRIP);
 
         webglUtils.setBuffersAndAttributes(gl, programInfo, blueNetCylinderLinesBufferInfo);
 
@@ -258,7 +247,7 @@ function main() {
         webglUtils.setUniforms(programInfo, greenNetCylinderUniforms);
 
         // calls gl.drawArrays or gl.drawElements
-        webglUtils.drawBufferInfo(gl,  greenNetCylinderCirclesBufferInfo, gl.LINE_LOOP);
+        webglUtils.drawBufferInfo(gl,  greenNetCylinderCirclesBufferInfo, gl.LINE_STRIP);
 
         webglUtils.setBuffersAndAttributes(gl, programInfo, greenNetCylinderLinesBufferInfo);
 
@@ -312,7 +301,7 @@ function main() {
         // now draw scene to the canvas projecting the depth texture into the scene
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        gl.clearColor(0, 0, 0, 1);
+        gl.clearColor(0, 0, 0, 0.5);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         let textureMatrix = m4.identity();
